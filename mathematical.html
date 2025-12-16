@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathematical Queueing Model - Queuing Simulation</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Mathematical Queueing Model</h1>
+            <p class="subtitle">Queue Performance Measures Calculator</p>
+        </header>
+        
+        <div class="content">
+            <button class="back-btn" onclick="window.location.href='index.html'">
+                ← Back to Models
+            </button>
+            
+            <h2>Mathematical Queueing Model</h2>
+            
+            <div class="input-section">
+                <h3>Queue Parameters</h3>
+                
+                <div class="input-group">
+                    <label for="arrivalRate">Arrival Rate (λ) - customers per time unit:</label>
+                    <input type="number" id="arrivalRate" min="0.1" max="100" step="0.1" value="4" placeholder="e.g., 4 customers/hour">
+                    <div class="input-hint">Average number of customers arriving per time unit</div>
+                </div>
+                
+                <div class="input-group">
+                    <label for="serviceRate">Service Rate (μ) - customers per time unit:</label>
+                    <input type="number" id="serviceRate" min="0.1" max="100" step="0.1" value="5" placeholder="e.g., 5 customers/hour">
+                    <div class="input-hint">Average number of customers that can be served per time unit</div>
+                </div>
+            </div>
+            
+            <button class="simulate-btn" onclick="calculateQueueMeasures()">
+                Calculate Queue Performance Measures
+            </button>
+            
+            <div class="results-section" id="resultsSection">
+                <!-- Results will be inserted here -->
+            </div>
+            
+            <div class="input-section" style="margin-top: 30px;">
+                <h3>Example from PDF</h3>
+                <p>Repair facility example from Chapter 4:</p>
+                <ul>
+                    <li>λ = 4 machines/hour (Poisson arrivals)</li>
+                    <li>μ = 5 machines/hour (Exponential service, 12 min/machine)</li>
+                </ul>
+                <button class="option-btn" onclick="loadExample()" style="width: 100%;">
+                    Load Lecture Example 
+                </button>
+            </div>
+        </div>
+                    <div class="theory-summary">
+                <h3>Queueing Theory Basics</h3>
+                <ul>
+                    <li><strong>λ:</strong> Arrival rate (customers/time unit)</li>
+                    <li><strong>μ:</strong> Service rate (customers/time unit)</li>
+                    <li><strong>Ls:</strong> Expected number of customers in system</li>
+                    <li><strong>Lq:</strong> Expected number of customers in queue</li>
+                    <li><strong>Ws:</strong> Expected waiting time in system</li>
+                    <li><strong>Wq:</strong> Expected waiting time in queue</li>
+                </ul>
+            </div>
+    </div>
+    
+    <script src="scripts.js"></script>
+    <script>
+        function loadExample() {
+            document.getElementById('arrivalRate').value = 4;
+            document.getElementById('serviceRate').value = 5;
+            showNotification('Loaded repair facility example: λ=4, μ=5', 'info');
+        }
+        
+        function calculateQueueMeasures() {
+            const arrivalRate = parseFloat(document.getElementById('arrivalRate').value);
+            const serviceRate = parseFloat(document.getElementById('serviceRate').value);
+            
+            // Validation
+            if (!arrivalRate || !serviceRate) {
+                showNotification('Please enter both arrival and service rates', 'error');
+                return;
+            }
+            
+            if (arrivalRate <= 0 || serviceRate <= 0) {
+                showNotification('Rates must be positive numbers', 'error');
+                return;
+            }
+            
+            const isStable = arrivalRate < serviceRate;
+            
+            // Calculate performance measures
+            const utilization = arrivalRate / serviceRate;
+            const ls = isStable ? arrivalRate / (serviceRate - arrivalRate) : Infinity;
+            const lq = isStable ? (arrivalRate * arrivalRate) / (serviceRate * (serviceRate - arrivalRate)) : Infinity;
+            const ws = isStable ? 1 / (serviceRate - arrivalRate) : Infinity;
+            const wq = isStable ? arrivalRate / (serviceRate * (serviceRate - arrivalRate)) : Infinity;
+            const p0 = 1 - utilization;
+            
+            // Generate results HTML
+            let resultsHTML = `
+                <h3>Queue Performance Measures</h3>
+                <div class="system-status ${isStable ? 'stable' : 'unstable'}">
+                    <strong>System Status:</strong> ${isStable ? 'STABLE' : 'UNSTABLE'}<br>
+                    <strong>Traffic Intensity (ρ):</strong> ${utilization.toFixed(4)} = ${(utilization * 100).toFixed(1)}%
+                </div>
+                
+                <table class="results-table">
+                    <thead>
+                        <tr>
+                            <th>Performance Measure</th>
+                            <th>Symbol</th>
+                            <th>Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Arrival Rate</td>
+                            <td>λ</td>
+                            <td>${arrivalRate.toFixed(2)} customers/time unit</td>
+                        </tr>
+                        <tr>
+                            <td>Service Rate</td>
+                            <td>μ</td>
+                            <td>${serviceRate.toFixed(2)} customers/time unit</td>
+                        </tr>
+                        <tr>
+                            <td>Server Utilization</td>
+                            <td>ρ</td>
+                            <td>${utilization.toFixed(4)} (${(utilization * 100).toFixed(1)}%)</td>
+                        </tr>
+                        <tr>
+                            <td>Average Customers in System</td>
+                            <td>Ls</td>
+                            <td>${isStable ? ls.toFixed(4) : '∞'}</td>
+                        </tr>
+                        <tr>
+                            <td>Average Customers in Queue</td>
+                            <td>Lq</td>
+                            <td>${isStable ? lq.toFixed(4) : '∞'}</td>
+                        </tr>
+                        <tr>
+                            <td>Average Time in System</td>
+                            <td>Ws</td>
+                            <td>${isStable ? ws.toFixed(4) : '∞'} time units</td>
+                        </tr>
+                        <tr>
+                            <td>Average Waiting Time in Queue</td>
+                            <td>Wq</td>
+                            <td>${isStable ? wq.toFixed(4) : '∞'} time units</td>
+                        </tr>
+                        <tr>
+                            <td>Probability System Empty</td>
+                            <td>P₀</td>
+                            <td>${p0.toFixed(4)} (${(p0 * 100).toFixed(1)}%)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            `;
+            
+            document.getElementById('resultsSection').innerHTML = resultsHTML;
+            showNotification('Queue performance measures calculated successfully!', 'success');
+        }
+    </script>
+    
+    <style>
+        .system-status {
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        
+        .system-status.stable {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .system-status.unstable {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .results-table td, .results-table th {
+            text-align: center;
+        }
+        
+        .results-table td:first-child {
+            text-align: left;
+        }
+    </style>
+</body>
+</html>

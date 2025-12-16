@@ -1,0 +1,1258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Server Queue Simulation</title>
+    <link rel="stylesheet" href="styles.css">
+
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Multi-Server Queue Simulation</h1>
+            <p class="subtitle">Two-Server Call Center Simulation (Able & Baker)</p>
+        </header>
+        
+        <div class="content">
+            <button class="back-btn" onclick="window.location.href='index.html'">
+                ← Back to Models
+            </button>
+            
+            <h2>Two-Server Queue Simulation (Call Center)</h2>
+            
+            <div class="input-section">
+                <h3>Simulation Parameters</h3>
+                
+                <div class="simulation-mode-selector">
+                    <label>Simulation End Condition:</label>
+                    <div class="simulation-mode">
+                        <div class="mode-option selected" id="modeTime" onclick="selectSimulationMode('time')">
+                            <h4>Time Limit</h4>
+                            <p>Simulation ends when reaching specified time</p>
+                        </div>
+                        <div class="mode-option" id="modeCustomers" onclick="selectSimulationMode('customers')">
+                            <h4>Customer Limit</h4>
+                            <p>Simulation ends when serving specified number of customers</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mode-description" id="modeDescription">
+                    Simulation will run for 60 minutes (1 hour) as in the PDF example
+                </div>
+                
+                <div class="input-group" id="timeInputGroup">
+                    <label for="simulationTime">Simulation Time (minutes):</label>
+                    <input type="number" id="simulationTime" min="10" max="500" value="60">
+                    <div class="input-hint">Simulation will stop when this time is reached</div>
+                </div>
+                
+                <div class="input-group" id="customerInputGroup" style="display: none;">
+                    <label for="numCustomers">Number of Customers to Serve:</label>
+                    <input type="number" id="numCustomers" min="5" max="200" value="20">
+                    <div class="input-hint">Simulation will stop when this many customers are served</div>
+                </div>
+                
+                <div class="input-group">
+                    <label>When Both Servers Are Idle, Which Server Gets Priority?</label>
+                    <div class="server-priority">
+                        <div class="priority-option selected" id="priorityAble" onclick="selectPriority('able')">
+                            <h4>Able (Server 1)</h4>
+                            <p>Able gets priority when both servers are idle (Able is more experienced)</p>
+                        </div>
+                        <div class="priority-option" id="priorityBaker" onclick="selectPriority('baker')">
+                            <h4>Baker (Server 2)</h4>
+                            <p>Baker gets priority when both servers are idle</p>
+                        </div>
+                        <div class="priority-option" id="priorityRandom" onclick="selectPriority('random')">
+                            <h4>Random</h4>
+                            <p>Randomly assign to either server when both are idle</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="input-section">
+                <h3>Interarrival Time Distribution</h3>
+                <p>Define time between arrivals and their probabilities (Total must equal 1.0000):</p>
+                
+                <table class="distribution-table" id="arrivalDistributionTable">
+                    <thead>
+                        <tr>
+                            <th>Time Between Arrivals (minutes)</th>
+                            <th>Probability</th>
+                            <th>Cumulative Probability</th>
+                            <th>Random-Digit Assignment</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="arrivalDistributionBody">
+                        <!-- Rows will be added here -->
+                    </tbody>
+                </table>
+                
+                <div>
+                    <button class="add-row-btn" onclick="addArrivalRow()">+ Add Arrival Time</button>
+                    <button class="remove-row-btn" onclick="removeLastArrivalRow()">- Remove Last</button>
+                    <span id="arrivalProbTotal" class="probability-status probability-error">Total Probability: 0.0000 (Should be 1.0000)</span>
+                </div>
+                
+                <div class="mapping-example">
+                    <strong>Example from PDF:</strong><br>
+                    Time between arrivals: 1 (0.25), 2 (0.40), 3 (0.20), 4 (0.15)<br>
+                    Random-digit assignments: 01–25, 26–65, 66–85, 86–00
+                </div>
+            </div>
+            
+            <div class="input-section">
+                <h3>Service Time Distributions</h3>
+                <p>Define service times for each server (Total must equal 1.0000 for each):</p>
+                
+                <div class="server-distributions">
+                    <div>
+                        <h4>Able (Server 1) Distribution</h4>
+                        <table class="distribution-table" id="ableDistributionTable">
+                            <thead>
+                                <tr>
+                                    <th>Service Time (minutes)</th>
+                                    <th>Probability</th>
+                                    <th>Cumulative Probability</th>
+                                    <th>Random-Digit Assignment</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ableDistributionBody">
+                                <!-- Rows will be added here -->
+                            </tbody>
+                        </table>
+                        
+                        <div>
+                            <button class="add-row-btn" onclick="addAbleRow()">+ Add Service Time</button>
+                            <button class="remove-row-btn" onclick="removeLastAbleRow()">- Remove Last</button>
+                            <span id="ableProbTotal" class="probability-status probability-error">Total Probability: 0.0000</span>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h4>Baker (Server 2) Distribution</h4>
+                        <table class="distribution-table" id="bakerDistributionTable">
+                            <thead>
+                                <tr>
+                                    <th>Service Time (minutes)</th>
+                                    <th>Probability</th>
+                                    <th>Cumulative Probability</th>
+                                    <th>Random-Digit Assignment</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="bakerDistributionBody">
+                                <!-- Rows will be added here -->
+                            </tbody>
+                        </table>
+                        
+                        <div>
+                            <button class="add-row-btn" onclick="addBakerRow()">+ Add Service Time</button>
+                            <button class="remove-row-btn" onclick="removeLastBakerRow()">- Remove Last</button>
+                            <span id="bakerProbTotal" class="probability-status probability-error">Total Probability: 0.0000</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mapping-example">
+                    <strong>Example from PDF:</strong><br>
+                    <strong>Able:</strong> Service times: 2 (0.30), 3 (0.28), 4 (0.25), 5 (0.17)<br>
+                    <strong>Baker:</strong> Service times: 3 (0.35), 4 (0.25), 5 (0.20), 6 (0.20)
+                </div>
+            </div>
+            
+            <div class="input-section">
+                <h3>Random Numbers Input</h3>
+                <p>Enter random numbers separated by commas (00-99):</p>
+                
+                <div class="warning">
+                    <strong>Note:</strong> Random numbers 0-99 only. 100 means 00. Numbers >100 will be capped at 99.
+                </div>
+                
+                <div class="option-buttons">
+                    <button class="option-btn" onclick="generateArrivalRandoms()">
+                        Generate Arrival Random Numbers
+                    </button>
+                    <button class="option-btn" onclick="generateAbleRandoms()">
+                        Generate Able Service Random Numbers
+                    </button>
+                    <button class="option-btn" onclick="generateBakerRandoms()">
+                        Generate Baker Service Random Numbers
+                    </button>
+                    <button class="option-btn" onclick="loadExampleFromPDF()">
+                        Load PDF Example
+                    </button>
+                </div>
+                
+                <div class="input-group">
+                    <label for="arrivalRandoms">Interarrival Random Numbers:</label>
+                    <textarea id="arrivalRandoms" class="random-numbers-input random-input-area" placeholder="Enter comma-separated random numbers" rows="3"></textarea>
+                    <div class="input-hint" id="arrivalHint">Need random numbers for arrivals</div>
+                </div>
+                
+                <div class="input-group">
+                    <label for="ableRandoms">Able Service Random Numbers:</label>
+                    <textarea id="ableRandoms" class="random-numbers-input random-input-area" placeholder="Enter comma-separated random numbers" rows="3"></textarea>
+                    <div class="input-hint" id="ableHint">Need random numbers for Able service</div>
+                </div>
+                
+                <div class="input-group">
+                    <label for="bakerRandoms">Baker Service Random Numbers:</label>
+                    <textarea id="bakerRandoms" class="random-numbers-input random-input-area" placeholder="Enter comma-separated random numbers" rows="3"></textarea>
+                    <div class="input-hint" id="bakerHint">Need random numbers for Baker service</div>
+                </div>
+            </div>
+            
+            <button class="simulate-btn" onclick="runMultiServerSimulation()">
+                Run Multi-Server Queue Simulation
+            </button>
+            
+            <div class="results-section" id="resultsSection">
+                <!-- Results will be inserted here -->
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Multi-Server Queue Simulation Tool | Based on Call Center Example from PDF</p>
+        </div>
+    </div>
+    
+    <script>
+        // Global variables
+        let arrivalDistribution = [];
+        let ableDistribution = [];
+        let bakerDistribution = [];
+        let priorityServer = 'able'; // Default: Able gets priority when both idle
+        let simulationMode = 'time'; // Default: time-based simulation
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadExampleFromPDF();
+            updateArrivalDistribution();
+            updateAbleDistribution();
+            updateBakerDistribution();
+            updateRandomNumberHints();
+        });
+        
+        function selectSimulationMode(mode) {
+            simulationMode = mode;
+            
+            // Update UI
+            document.getElementById('modeTime').classList.remove('selected');
+            document.getElementById('modeCustomers').classList.remove('selected');
+            document.getElementById('mode' + mode.charAt(0).toUpperCase() + mode.slice(1)).classList.add('selected');
+            
+            // Show/hide appropriate input
+            if (mode === 'time') {
+                document.getElementById('timeInputGroup').style.display = 'block';
+                document.getElementById('customerInputGroup').style.display = 'none';
+                document.getElementById('modeDescription').textContent = 'Simulation will run for the specified time (minutes)';
+            } else {
+                document.getElementById('timeInputGroup').style.display = 'none';
+                document.getElementById('customerInputGroup').style.display = 'block';
+                document.getElementById('modeDescription').textContent = 'Simulation will run until the specified number of customers are served';
+            }
+            
+            updateRandomNumberHints();
+        }
+        
+        function updateRandomNumberHints() {
+            if (simulationMode === 'time') {
+                // For time-based, we don't know exact number of customers
+                document.getElementById('arrivalHint').textContent = 'Enter enough random numbers for expected arrivals (e.g., 30-40 numbers for 60 minutes)';
+                document.getElementById('ableHint').textContent = 'Enter enough random numbers for expected Able services';
+                document.getElementById('bakerHint').textContent = 'Enter enough random numbers for expected Baker services';
+            } else {
+                const numCustomers = parseInt(document.getElementById('numCustomers').value) || 20;
+                document.getElementById('arrivalHint').textContent = `Need ${numCustomers - 1} arrival random numbers (one less than customers)`;
+                document.getElementById('ableHint').textContent = `Need ${numCustomers} Able service random numbers`;
+                document.getElementById('bakerHint').textContent = `Need ${numCustomers} Baker service random numbers`;
+            }
+        }
+        
+        function selectPriority(server) {
+            priorityServer = server;
+            
+            // Update UI
+            document.getElementById('priorityAble').classList.remove('selected');
+            document.getElementById('priorityBaker').classList.remove('selected');
+            document.getElementById('priorityRandom').classList.remove('selected');
+            
+            document.getElementById('priority' + server.charAt(0).toUpperCase() + server.slice(1)).classList.add('selected');
+        }
+        
+        // Arrival distribution functions
+        function addArrivalRow(time = '', prob = '') {
+            const tbody = document.getElementById('arrivalDistributionBody');
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td><input type="number" class="arrival-time" value="${time}" min="1" max="100" placeholder="e.g., 1"></td>
+                <td><input type="number" class="arrival-prob" value="${prob}" min="0" max="1" step="0.01" placeholder="0.25"></td>
+                <td class="arrival-cumulative">0.0000</td>
+                <td class="arrival-range">01-01</td>
+                <td><button onclick="this.parentElement.parentElement.remove(); updateArrivalDistribution()" style="padding: 5px 10px; background: #e74c3c; color: white; border: none; border-radius: 3px; cursor: pointer;">Remove</button></td>
+            `;
+            tbody.appendChild(row);
+            
+            // Add event listeners to inputs
+            row.querySelector('.arrival-time').addEventListener('input', updateArrivalDistribution);
+            row.querySelector('.arrival-prob').addEventListener('input', updateArrivalDistribution);
+            
+            updateArrivalDistribution();
+        }
+        
+        function removeLastArrivalRow() {
+            const tbody = document.getElementById('arrivalDistributionBody');
+            if (tbody.children.length > 0) {
+                tbody.lastElementChild.remove();
+                updateArrivalDistribution();
+            }
+        }
+        
+        // Able distribution functions
+        function addAbleRow(time = '', prob = '') {
+            const tbody = document.getElementById('ableDistributionBody');
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td><input type="number" class="able-time" value="${time}" min="1" max="100" placeholder="e.g., 2"></td>
+                <td><input type="number" class="able-prob" value="${prob}" min="0" max="1" step="0.01" placeholder="0.30"></td>
+                <td class="able-cumulative">0.0000</td>
+                <td class="able-range">01-01</td>
+                <td><button onclick="this.parentElement.parentElement.remove(); updateAbleDistribution()" style="padding: 5px 10px; background: #e74c3c; color: white; border: none; border-radius: 3px; cursor: pointer;">Remove</button></td>
+            `;
+            tbody.appendChild(row);
+            
+            // Add event listeners to inputs
+            row.querySelector('.able-time').addEventListener('input', updateAbleDistribution);
+            row.querySelector('.able-prob').addEventListener('input', updateAbleDistribution);
+            
+            updateAbleDistribution();
+        }
+        
+        function removeLastAbleRow() {
+            const tbody = document.getElementById('ableDistributionBody');
+            if (tbody.children.length > 0) {
+                tbody.lastElementChild.remove();
+                updateAbleDistribution();
+            }
+        }
+        
+        // Baker distribution functions
+        function addBakerRow(time = '', prob = '') {
+            const tbody = document.getElementById('bakerDistributionBody');
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td><input type="number" class="baker-time" value="${time}" min="1" max="100" placeholder="e.g., 3"></td>
+                <td><input type="number" class="baker-prob" value="${prob}" min="0" max="1" step="0.01" placeholder="0.35"></td>
+                <td class="baker-cumulative">0.0000</td>
+                <td class="baker-range">01-01</td>
+                <td><button onclick="this.parentElement.parentElement.remove(); updateBakerDistribution()" style="padding: 5px 10px; background: #e74c3c; color: white; border: none; border-radius: 3px; cursor: pointer;">Remove</button></td>
+            `;
+            tbody.appendChild(row);
+            
+            // Add event listeners to inputs
+            row.querySelector('.baker-time').addEventListener('input', updateBakerDistribution);
+            row.querySelector('.baker-prob').addEventListener('input', updateBakerDistribution);
+            
+            updateBakerDistribution();
+        }
+        
+        function removeLastBakerRow() {
+            const tbody = document.getElementById('bakerDistributionBody');
+            if (tbody.children.length > 0) {
+                tbody.lastElementChild.remove();
+                updateBakerDistribution();
+            }
+        }
+        
+        // Update distribution tables
+        function updateDistribution(tableId, distributionArray, probClass, timeClass, cumClass, rangeClass, totalId) {
+            const rows = document.getElementById(tableId).getElementsByTagName('tbody')[0].children;
+            let totalProb = 0;
+            let cumulative = 0;
+            
+            distributionArray.length = 0; // Clear array
+            
+            // Collect data
+            const probabilities = [];
+            for (let i = 0; i < rows.length; i++) {
+                const row = rows[i];
+                const time = parseFloat(row.querySelector('.' + timeClass).value) || 0;
+                const prob = parseFloat(row.querySelector('.' + probClass).value) || 0;
+                
+                if (time > 0 && prob > 0) {
+                    probabilities.push({time: time, prob: prob});
+                    totalProb += prob;
+                }
+            }
+            
+            if (probabilities.length === 0) {
+                const totalElement = document.getElementById(totalId);
+                totalElement.textContent = `Total Probability: 0.0000 (Should be 1.0000)`;
+                totalElement.className = 'probability-status probability-error';
+                return;
+            }
+            
+            // Calculate ranges (simple proportional allocation)
+            let currentRangeStart = 1;
+            let slotTotal = 0;
+            
+            for (let i = 0; i < probabilities.length; i++) {
+                const {time, prob} = probabilities[i];
+                
+                // Calculate how many slots (1-100) this probability gets
+                const slots = Math.round(prob * 100);
+                slotTotal += slots;
+                
+                // Handle last item to ensure total is 100
+                let endRange;
+                if (i === probabilities.length - 1) {
+                    endRange = 100; // Last item goes to 100
+                } else {
+                    endRange = currentRangeStart + slots - 1;
+                }
+                
+                // Handle wrap-around: if endRange > 100, show as 00
+                let displayEndRange = endRange;
+                if (endRange === 100) {
+                    displayEndRange = 0; // Show as 00 for display
+                }
+                
+                cumulative += prob;
+                
+                // Store in distribution array
+                distributionArray.push({
+                    time: time,
+                    probability: prob,
+                    cumulative: cumulative,
+                    startRange: currentRangeStart,
+                    endRange: endRange,
+                    displayEndRange: displayEndRange
+                });
+                
+                // Update display
+                if (rows[i]) {
+                    rows[i].querySelector('.' + cumClass).textContent = cumulative.toFixed(4);
+                    rows[i].querySelector('.' + rangeClass).textContent = 
+                        `${String(currentRangeStart).padStart(2, '0')}–${String(displayEndRange).padStart(2, '0')}`;
+                }
+                
+                currentRangeStart = endRange + 1;
+                if (currentRangeStart > 100) currentRangeStart = 1;
+            }
+            
+            // Update total probability display
+            const totalElement = document.getElementById(totalId);
+            const tolerance = 0.001; // Allow small floating point errors
+            
+            if (Math.abs(totalProb - 1.0) < tolerance) {
+                totalElement.textContent = `Total Probability: ${totalProb.toFixed(4)} ✓`;
+                totalElement.className = 'probability-status probability-ok';
+            } else {
+                totalElement.textContent = `Total Probability: ${totalProb.toFixed(4)} (Should be 1.0000)`;
+                totalElement.className = 'probability-status probability-error';
+            }
+        }
+        
+        function updateArrivalDistribution() {
+            updateDistribution('arrivalDistributionTable', arrivalDistribution, 
+                'arrival-prob', 'arrival-time', 'arrival-cumulative', 'arrival-range', 'arrivalProbTotal');
+        }
+        
+        function updateAbleDistribution() {
+            updateDistribution('ableDistributionTable', ableDistribution, 
+                'able-prob', 'able-time', 'able-cumulative', 'able-range', 'ableProbTotal');
+        }
+        
+        function updateBakerDistribution() {
+            updateDistribution('bakerDistributionTable', bakerDistribution, 
+                'baker-prob', 'baker-time', 'baker-cumulative', 'baker-range', 'bakerProbTotal');
+        }
+        
+        // Random number generation functions
+        function generateArrivalRandoms() {
+            let randomNumbers = [];
+            let count = 30; // Default for time-based
+            
+            if (simulationMode === 'customers') {
+                const numCustomers = parseInt(document.getElementById('numCustomers').value) || 20;
+                count = numCustomers - 1;
+            }
+            
+            for (let i = 0; i < count; i++) {
+                randomNumbers.push(Math.floor(Math.random() * 100));
+            }
+            
+            document.getElementById('arrivalRandoms').value = randomNumbers.join(', ');
+            alert(`Generated ${count} arrival random numbers (00-99)`);
+        }
+        
+        function generateAbleRandoms() {
+            let randomNumbers = [];
+            let count = 30; // Default for time-based
+            
+            if (simulationMode === 'customers') {
+                const numCustomers = parseInt(document.getElementById('numCustomers').value) || 20;
+                count = numCustomers;
+            }
+            
+            for (let i = 0; i < count; i++) {
+                randomNumbers.push(Math.floor(Math.random() * 100));
+            }
+            
+            document.getElementById('ableRandoms').value = randomNumbers.join(', ');
+            alert(`Generated ${count} Able service random numbers (00-99)`);
+        }
+        
+        function generateBakerRandoms() {
+            let randomNumbers = [];
+            let count = 30; // Default for time-based
+            
+            if (simulationMode === 'customers') {
+                const numCustomers = parseInt(document.getElementById('numCustomers').value) || 20;
+                count = numCustomers;
+            }
+            
+            for (let i = 0; i < count; i++) {
+                randomNumbers.push(Math.floor(Math.random() * 100));
+            }
+            
+            document.getElementById('bakerRandoms').value = randomNumbers.join(', ');
+            alert(`Generated ${count} Baker service random numbers (00-99)`);
+        }
+        
+        // Load example from PDF
+        function loadExampleFromPDF() {
+            // Clear existing rows
+            document.getElementById('arrivalDistributionBody').innerHTML = '';
+            document.getElementById('ableDistributionBody').innerHTML = '';
+            document.getElementById('bakerDistributionBody').innerHTML = '';
+            
+            // Load arrival distribution from PDF
+            const arrivalData = [
+                {time: 1, prob: 0.25},
+                {time: 2, prob: 0.40},
+                {time: 3, prob: 0.20},
+                {time: 4, prob: 0.15}
+            ];
+            
+            arrivalData.forEach(data => {
+                addArrivalRow(data.time, data.prob);
+            });
+            
+            // Load Able distribution from PDF
+            const ableData = [
+                {time: 2, prob: 0.30},
+                {time: 3, prob: 0.28},
+                {time: 4, prob: 0.25},
+                {time: 5, prob: 0.17}
+            ];
+            
+            ableData.forEach(data => {
+                addAbleRow(data.time, data.prob);
+            });
+            
+            // Load Baker distribution from PDF
+            const bakerData = [
+                {time: 3, prob: 0.35},
+                {time: 4, prob: 0.25},
+                {time: 5, prob: 0.20},
+                {time: 6, prob: 0.20}
+            ];
+            
+            bakerData.forEach(data => {
+                addBakerRow(data.time, data.prob);
+            });
+            
+            // Load random numbers from PDF example
+            const arrivalRandoms = [26, 98, 90, 26, 42, 74, 80, 68, 22, 48, 90, 17, 89, 93, 46, 68, 6, 17, 83];
+            const ableRandoms = [95, 21, 51, 92, 89, 38, 13, 61, 50, 49, 39, 53, 88, 86, 36, 24, 53, 74, 17, 33];
+            const bakerRandoms = [25, 36, 52, 45, 73, 77, 65, 85, 23, 76, 25, 15, 11, 98, 67, 42, 35, 86, 43, 57];
+            
+            document.getElementById('arrivalRandoms').value = arrivalRandoms.join(', ');
+            document.getElementById('ableRandoms').value = ableRandoms.join(', ');
+            document.getElementById('bakerRandoms').value = bakerRandoms.join(', ');
+            
+            // Set to time-based simulation (as in PDF)
+            selectSimulationMode('time');
+            document.getElementById('simulationTime').value = 60;
+            document.getElementById('numCustomers').value = 20;
+            
+            // Update distributions
+            updateArrivalDistribution();
+            updateAbleDistribution();
+            updateBakerDistribution();
+            
+            alert('Loaded PDF example successfully! This simulates a call center with 2 servers (Able & Baker) for 60 minutes.');
+        }
+        
+        // Utility functions
+        function normalizeRandomNumber(num) {
+            let n = parseInt(num);
+            
+            if (isNaN(n)) return 1;
+            if (n === 0 || n === 100) return 100;
+            if (n > 100) return 100;
+            if (n < 1) return 1;
+            
+            return n;
+        }
+        
+        function mapRandomToTime(randomDigit, distribution) {
+            const randomValue = normalizeRandomNumber(randomDigit);
+            
+            if (distribution.length === 0) {
+                alert('Please define distribution first');
+                return 1;
+            }
+            
+            // Find which range the random number falls into
+            for (let dist of distribution) {
+                const start = dist.startRange;
+                const end = dist.endRange;
+                
+                if (randomValue >= start && randomValue <= end) {
+                    return dist.time;
+                }
+            }
+            
+            // If not found, use last distribution
+            return distribution[distribution.length - 1].time;
+        }
+        
+        // Main simulation function
+        function runMultiServerSimulation() {
+            let simulationTimeLimit, targetCustomers;
+            
+            if (simulationMode === 'time') {
+                simulationTimeLimit = parseInt(document.getElementById('simulationTime').value);
+                if (!simulationTimeLimit || simulationTimeLimit < 1) {
+                    alert('Please enter a valid simulation time (minimum 1 minute)');
+                    return;
+                }
+                targetCustomers = Infinity; // No customer limit for time-based
+            } else {
+                targetCustomers = parseInt(document.getElementById('numCustomers').value);
+                if (!targetCustomers || targetCustomers < 1) {
+                    alert('Please enter a valid number of customers (minimum 1)');
+                    return;
+                }
+                simulationTimeLimit = Infinity; // No time limit for customer-based
+            }
+            
+            // Validate distributions
+            if (arrivalDistribution.length === 0) {
+                alert('Please define arrival time distribution');
+                return;
+            }
+            
+            if (ableDistribution.length === 0) {
+                alert('Please define Able service time distribution');
+                return;
+            }
+            
+            if (bakerDistribution.length === 0) {
+                alert('Please define Baker service time distribution');
+                return;
+            }
+            
+            // Check if probabilities sum to 1
+            const arrivalTotal = arrivalDistribution.reduce((sum, dist) => sum + dist.probability, 0);
+            const ableTotal = ableDistribution.reduce((sum, dist) => sum + dist.probability, 0);
+            const bakerTotal = bakerDistribution.reduce((sum, dist) => sum + dist.probability, 0);
+            const tolerance = 0.001;
+            
+            if (Math.abs(arrivalTotal - 1.0) > tolerance) {
+                alert('Arrival probabilities must sum to exactly 1.0000');
+                return;
+            }
+            
+            if (Math.abs(ableTotal - 1.0) > tolerance) {
+                alert('Able service probabilities must sum to exactly 1.0000');
+                return;
+            }
+            
+            if (Math.abs(bakerTotal - 1.0) > tolerance) {
+                alert('Baker service probabilities must sum to exactly 1.0000');
+                return;
+            }
+            
+            // Parse random numbers
+            const arrivalInput = document.getElementById('arrivalRandoms').value.trim();
+            const ableInput = document.getElementById('ableRandoms').value.trim();
+            const bakerInput = document.getElementById('bakerRandoms').value.trim();
+            
+            if (!arrivalInput || !ableInput || !bakerInput) {
+                alert('Please provide all random numbers (arrival, Able service, Baker service)');
+                return;
+            }
+            
+            // Parse and normalize random numbers
+            const arrivalRandoms = arrivalInput.split(',')
+                .map(r => r.trim())
+                .filter(r => r !== '')
+                .map(normalizeRandomNumber);
+            
+            const ableRandoms = ableInput.split(',')
+                .map(r => r.trim())
+                .filter(r => r !== '')
+                .map(normalizeRandomNumber);
+            
+            const bakerRandoms = bakerInput.split(',')
+                .map(r => r.trim())
+                .filter(r => r !== '')
+                .map(normalizeRandomNumber);
+            
+            // For customer-based simulation, check if we have enough random numbers
+            if (simulationMode === 'customers') {
+                if (arrivalRandoms.length < targetCustomers - 1) {
+                    alert(`Need ${targetCustomers - 1} arrival random numbers, got ${arrivalRandoms.length}`);
+                    return;
+                }
+                
+                if (ableRandoms.length < targetCustomers) {
+                    alert(`Need ${targetCustomers} Able service random numbers, got ${ableRandoms.length}`);
+                    return;
+                }
+                
+                if (bakerRandoms.length < targetCustomers) {
+                    alert(`Need ${targetCustomers} Baker service random numbers, got ${bakerRandoms.length}`);
+                    return;
+                }
+            }
+            
+            // Run simulation
+            const simulation = simulateMultiServerQueue(
+                arrivalRandoms,
+                ableRandoms,
+                bakerRandoms,
+                simulationTimeLimit,
+                targetCustomers
+            );
+            
+            // Display results
+            displayMultiServerResults(simulation);
+        }
+        
+        function simulateMultiServerQueue(arrivalRandoms, ableRandoms, bakerRandoms, timeLimit, customerLimit) {
+            let customers = [];
+            let totalWaitTime = 0;
+            let totalSystemTime = 0;
+            let ableIdleTime = 0;
+            let bakerIdleTime = 0;
+            let ableBusyTime = 0;
+            let bakerBusyTime = 0;
+            let numWaiting = 0;
+            
+            let clock = 0;
+            let ableFreeTime = 0; // Time when Able becomes free
+            let bakerFreeTime = 0; // Time when Baker becomes free
+            let customerCount = 0;
+            let ablePrevFreeTime = 0;
+            let bakerPrevFreeTime = 0;
+            
+            // Determine which limit we're using
+            const useTimeLimit = timeLimit !== Infinity;
+            const useCustomerLimit = customerLimit !== Infinity;
+            
+            // Get random number indices
+            let arrivalIndex = 0;
+            let ableIndex = 0;
+            let bakerIndex = 0;
+            
+            // Simulation loop
+            while (true) {
+                // Check stopping conditions
+                if (useTimeLimit && clock >= timeLimit) break;
+                if (useCustomerLimit && customerCount >= customerLimit) break;
+                if (arrivalIndex >= arrivalRandoms.length && customerCount > 0) break;
+                if (ableIndex >= ableRandoms.length || bakerIndex >= bakerRandoms.length) break;
+                
+                // Calculate arrival time
+                let arrivalTime;
+                if (customerCount === 0) {
+                    arrivalTime = 0;
+                    ablePrevFreeTime = 0;
+                    bakerPrevFreeTime = 0;
+                } else {
+                    // Map random number to interarrival time
+                    const interarrivalTime = mapRandomToTime(arrivalRandoms[arrivalIndex], arrivalDistribution);
+                    arrivalTime = customers[customerCount-1].arrivalTime + interarrivalTime;
+                    arrivalIndex++;
+                }
+                
+                // Update clock to arrival time
+                clock = arrivalTime;
+                if (useTimeLimit && clock > timeLimit) {
+                    // Customer arrived after time limit, don't process
+                    break;
+                }
+                
+                // Calculate idle times for servers before this arrival
+                if (arrivalTime > ablePrevFreeTime) {
+                    ableIdleTime += (arrivalTime - ablePrevFreeTime);
+                }
+                if (arrivalTime > bakerPrevFreeTime) {
+                    bakerIdleTime += (arrivalTime - bakerPrevFreeTime);
+                }
+                
+                // Determine which server to use based on priority rule
+                let serverAssigned = '';
+                let timeServiceBegins = 0;
+                let serviceTime = 0;
+                let timeServiceEnds = 0;
+                
+                // Check server availability
+                const ableAvailable = arrivalTime >= ableFreeTime;
+                const bakerAvailable = arrivalTime >= bakerFreeTime;
+                
+                if (ableAvailable && bakerAvailable) {
+                    // Both servers are idle, apply priority rule
+                    if (priorityServer === 'able') {
+                        serverAssigned = 'Able';
+                    } else if (priorityServer === 'baker') {
+                        serverAssigned = 'Baker';
+                    } else {
+                        // Random assignment
+                        serverAssigned = Math.random() < 0.5 ? 'Able' : 'Baker';
+                    }
+                } else if (ableAvailable) {
+                    serverAssigned = 'Able';
+                } else if (bakerAvailable) {
+                    serverAssigned = 'Baker';
+                } else {
+                    // Both servers are busy, customer waits for first available
+                    if (ableFreeTime <= bakerFreeTime) {
+                        serverAssigned = 'Able';
+                    } else {
+                        serverAssigned = 'Baker';
+                    }
+                }
+                
+                // Get service time based on assigned server
+                if (serverAssigned === 'Able') {
+                    serviceTime = mapRandomToTime(ableRandoms[ableIndex], ableDistribution);
+                    ableIndex++;
+                } else {
+                    serviceTime = mapRandomToTime(bakerRandoms[bakerIndex], bakerDistribution);
+                    bakerIndex++;
+                }
+                
+                // Set service parameters
+                if (serverAssigned === 'Able') {
+                    timeServiceBegins = Math.max(arrivalTime, ableFreeTime);
+                    timeServiceEnds = timeServiceBegins + serviceTime;
+                    ablePrevFreeTime = ableFreeTime;
+                    ableFreeTime = timeServiceEnds;
+                    ableBusyTime += serviceTime;
+                } else {
+                    timeServiceBegins = Math.max(arrivalTime, bakerFreeTime);
+                    timeServiceEnds = timeServiceBegins + serviceTime;
+                    bakerPrevFreeTime = bakerFreeTime;
+                    bakerFreeTime = timeServiceEnds;
+                    bakerBusyTime += serviceTime;
+                }
+                
+                // Calculate waiting and system times
+                const waitTime = timeServiceBegins - arrivalTime;
+                const systemTime = timeServiceEnds - arrivalTime;
+                const timeInQueue = waitTime; // Time in queue is the same as wait time
+                
+                if (waitTime > 0) {
+                    numWaiting++;
+                }
+                
+                totalWaitTime += waitTime;
+                totalSystemTime += systemTime;
+                
+                // Store customer data
+                customers.push({
+                    customer: customerCount + 1,
+                    arrivalRandom: customerCount === 0 ? '-' : arrivalRandoms[arrivalIndex - 1],
+                    interarrivalTime: customerCount === 0 ? '-' : mapRandomToTime(arrivalRandoms[arrivalIndex - 1], arrivalDistribution),
+                    arrivalTime: arrivalTime,
+                    
+                    // Able columns
+                    ableServiceRandom: serverAssigned === 'Able' ? ableRandoms[ableIndex - 1] : ableRandoms[ableIndex],
+                    ableServiceTime: serverAssigned === 'Able' ? serviceTime : mapRandomToTime(ableRandoms[ableIndex], ableDistribution),
+                    ableServiceBegins: serverAssigned === 'Able' ? timeServiceBegins : '',
+                    ableServiceEnds: serverAssigned === 'Able' ? timeServiceEnds : '',
+                    
+                    // Baker columns
+                    bakerServiceRandom: serverAssigned === 'Baker' ? bakerRandoms[bakerIndex - 1] : bakerRandoms[bakerIndex],
+                    bakerServiceTime: serverAssigned === 'Baker' ? serviceTime : mapRandomToTime(bakerRandoms[bakerIndex], bakerDistribution),
+                    bakerServiceBegins: serverAssigned === 'Baker' ? timeServiceBegins : '',
+                    bakerServiceEnds: serverAssigned === 'Baker' ? timeServiceEnds : '',
+                    
+                    // Common columns
+                    server: serverAssigned,
+                    timeInQueue: timeInQueue,
+                    systemTime: systemTime,
+                    waitTime: waitTime
+                });
+                
+                customerCount++;
+                clock = Math.max(clock, timeServiceEnds);
+            }
+            
+            // Calculate final idle times (idle at the end of simulation)
+            const simulationEndTime = useTimeLimit ? Math.min(clock, timeLimit) : clock;
+            if (ableFreeTime < simulationEndTime) ableIdleTime += (simulationEndTime - ableFreeTime);
+            if (bakerFreeTime < simulationEndTime) bakerIdleTime += (simulationEndTime - bakerFreeTime);
+            
+            // Calculate server utilization
+            const ableUtilization = simulationEndTime > 0 ? ableBusyTime / simulationEndTime : 0;
+            const bakerUtilization = simulationEndTime > 0 ? bakerBusyTime / simulationEndTime : 0;
+            
+            return {
+                customers: customers,
+                totalWaitTime: totalWaitTime,
+                totalSystemTime: totalSystemTime,
+                ableIdleTime: ableIdleTime,
+                bakerIdleTime: bakerIdleTime,
+                ableBusyTime: ableBusyTime,
+                bakerBusyTime: bakerBusyTime,
+                ableUtilization: ableUtilization,
+                bakerUtilization: bakerUtilization,
+                numWaiting: numWaiting,
+                totalCustomers: customers.length,
+                simulationEndTime: simulationEndTime,
+                simulationMode: simulationMode,
+                timeLimit: timeLimit,
+                customerLimit: customerLimit
+            };
+        }
+        
+        function displayMultiServerResults(simulation) {
+            const { 
+                customers, 
+                totalWaitTime, 
+                totalSystemTime, 
+                ableIdleTime, 
+                bakerIdleTime,
+                ableBusyTime,
+                bakerBusyTime,
+                ableUtilization,
+                bakerUtilization,
+                numWaiting, 
+                totalCustomers, 
+                simulationEndTime,
+                simulationMode,
+                timeLimit,
+                customerLimit
+            } = simulation;
+            
+            // Calculate performance measures
+            const avgWaitTime = totalCustomers > 0 ? totalWaitTime / totalCustomers : 0;
+            const avgSystemTime = totalCustomers > 0 ? totalSystemTime / totalCustomers : 0;
+            const probWait = totalCustomers > 0 ? numWaiting / totalCustomers : 0;
+            const totalInterarrivalTimes = customers.slice(1).reduce((sum, cust) => sum + cust.interarrivalTime, 0);
+            const avgInterarrivalTime = customers.length > 1 ? totalInterarrivalTimes / (customers.length - 1) : 0;
+            
+            // Determine simulation mode description
+            let modeDescription = '';
+            if (simulationMode === 'time') {
+                modeDescription = `Time-based simulation: ${timeLimit} minutes`;
+            } else {
+                modeDescription = `Customer-based simulation: ${customerLimit} customers`;
+            }
+            
+            // Create distribution tables
+            let distributionHTML = `
+                <h3 class="results-header">Input Distributions</h3>
+                
+                <h4>Arrival Time Distribution</h4>
+                <table class="distribution-table">
+                    <thead>
+                        <tr>
+                            <th>Time Between Arrivals</th>
+                            <th>Probability</th>
+                            <th>Cumulative</th>
+                            <th>Random Number Range</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            arrivalDistribution.forEach(dist => {
+                distributionHTML += `
+                    <tr>
+                        <td>${dist.time} minutes</td>
+                        <td>${dist.probability.toFixed(4)}</td>
+                        <td>${dist.cumulative.toFixed(4)}</td>
+                        <td>${String(dist.startRange).padStart(2, '0')}-${String(dist.endRange === 100 ? 0 : dist.endRange).padStart(2, '0')}</td>
+                    </tr>
+                `;
+            });
+            
+            distributionHTML += `
+                    </tbody>
+                </table>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 30px;">
+                    <div>
+                        <h4>Able Service Distribution</h4>
+                        <table class="distribution-table">
+                            <thead>
+                                <tr>
+                                    <th>Service Time</th>
+                                    <th>Probability</th>
+                                    <th>Cumulative</th>
+                                    <th>Random Number Range</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+            `;
+            
+            ableDistribution.forEach(dist => {
+                distributionHTML += `
+                    <tr>
+                        <td>${dist.time} minutes</td>
+                        <td>${dist.probability.toFixed(4)}</td>
+                        <td>${dist.cumulative.toFixed(4)}</td>
+                        <td>${String(dist.startRange).padStart(2, '0')}-${String(dist.endRange === 100 ? 0 : dist.endRange).padStart(2, '0')}</td>
+                    </tr>
+                `;
+            });
+            
+            distributionHTML += `
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div>
+                        <h4>Baker Service Distribution</h4>
+                        <table class="distribution-table">
+                            <thead>
+                                <tr>
+                                    <th>Service Time</th>
+                                    <th>Probability</th>
+                                    <th>Cumulative</th>
+                                    <th>Random Number Range</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+            `;
+            
+            bakerDistribution.forEach(dist => {
+                distributionHTML += `
+                    <tr>
+                        <td>${dist.time} minutes</td>
+                        <td>${dist.probability.toFixed(4)}</td>
+                        <td>${dist.cumulative.toFixed(4)}</td>
+                        <td>${String(dist.startRange).padStart(2, '0')}-${String(dist.endRange === 100 ? 0 : dist.endRange).padStart(2, '0')}</td>
+                    </tr>
+                `;
+            });
+            
+            distributionHTML += `
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+            
+            // Create simulation table with both Able and Baker columns
+            let tableHTML = '';
+            if (customers.length > 0) {
+                tableHTML = `
+                    <h3 class="results-header">Simulation Table - ${modeDescription}</h3>
+                    <div style="margin-bottom: 15px; padding: 10px; background-color: #e8f4ff; border-radius: 5px;">
+                        <strong>Simulation Results:</strong> ${totalCustomers} customers served in ${simulationEndTime.toFixed(1)} minutes
+                    </div>
+                    <div class="simulation-table-container">
+                        <table class="simulation-table">
+                            <thead>
+                                <tr>
+                                    <th rowspan="2">Customer</th>
+                                    <th rowspan="2">Arrival Random</th>
+                                    <th rowspan="2">Interarrival Time</th>
+                                    <th rowspan="2">Arrival Time</th>
+                                    <th colspan="5" class="server-header">Able (Server 1)</th>
+                                    <th colspan="5" class="server-header">Baker (Server 2)</th>
+                                    <th rowspan="2">Server Assigned</th>
+                                    <th rowspan="2">Time in Queue</th>
+                                    <th rowspan="2">System Time</th>
+                                </tr>
+                                <tr>
+                                    <!-- Able sub-headers -->
+                                    <th class="server-header">Service Random</th>
+                                    <th class="server-header">Service Time</th>
+                                    <th class="server-header">Service Begins</th>
+                                    <th class="server-header">Service Ends</th>
+                                    <th class="server-header">Idle Time</th>
+                                    
+                                    <!-- Baker sub-headers -->
+                                    <th class="server-header">Service Random</th>
+                                    <th class="server-header">Service Time</th>
+                                    <th class="server-header">Service Begins</th>
+                                    <th class="server-header">Service Ends</th>
+                                    <th class="server-header">Idle Time</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                `;
+                
+                // Track previous service end times for idle time calculation
+                let prevAbleEnd = 0;
+                let prevBakerEnd = 0;
+                
+                customers.forEach((customer, index) => {
+                    const serverClass = customer.server === 'Able' ? 'highlight-able' : 'highlight-baker';
+                    
+                    // Calculate idle times
+                    let ableIdleBefore = index === 0 ? customer.arrivalTime : Math.max(0, customer.arrivalTime - prevAbleEnd);
+                    let bakerIdleBefore = index === 0 ? customer.arrivalTime : Math.max(0, customer.arrivalTime - prevBakerEnd);
+                    
+                    // Format data - show blank if server is not working on this customer
+                    const ableServiceBegins = customer.ableServiceBegins !== '' ? customer.ableServiceBegins.toFixed(1) : '<span class="blank-data">-</span>';
+                    const ableServiceEnds = customer.ableServiceEnds !== '' ? customer.ableServiceEnds.toFixed(1) : '<span class="blank-data">-</span>';
+                    const bakerServiceBegins = customer.bakerServiceBegins !== '' ? customer.bakerServiceBegins.toFixed(1) : '<span class="blank-data">-</span>';
+                    const bakerServiceEnds = customer.bakerServiceEnds !== '' ? customer.bakerServiceEnds.toFixed(1) : '<span class="blank-data">-</span>';
+                    
+                    // Update previous end times
+                    if (customer.server === 'Able') {
+                        prevAbleEnd = customer.ableServiceEnds;
+                    } else {
+                        prevBakerEnd = customer.bakerServiceEnds;
+                    }
+                    
+                    tableHTML += `
+                        <tr class="${serverClass}">
+                            <td>${customer.customer}</td>
+                            <td>${String(customer.arrivalRandom).padStart(2, '0')}</td>
+                            <td>${customer.interarrivalTime}</td>
+                            <td>${customer.arrivalTime.toFixed(1)}</td>
+                            
+                            <!-- Able columns -->
+                            <td>${String(customer.ableServiceRandom).padStart(2, '0')}</td>
+                            <td>${customer.ableServiceTime}</td>
+                            <td>${ableServiceBegins}</td>
+                            <td>${ableServiceEnds}</td>
+                            <td>${ableIdleBefore.toFixed(1)}</td>
+                            
+                            <!-- Baker columns -->
+                            <td>${String(customer.bakerServiceRandom).padStart(2, '0')}</td>
+                            <td>${customer.bakerServiceTime}</td>
+                            <td>${bakerServiceBegins}</td>
+                            <td>${bakerServiceEnds}</td>
+                            <td>${bakerIdleBefore.toFixed(1)}</td>
+                            
+                            <!-- Common columns -->
+                            <td><strong>${customer.server}</strong></td>
+                            <td>${customer.timeInQueue.toFixed(1)}</td>
+                            <td>${customer.systemTime.toFixed(1)}</td>
+                        </tr>
+                    `;
+                });
+                
+                tableHTML += `
+                            <tr style="background-color: #f8f9fa; font-weight: bold;">
+                                <td colspan="16"><strong>Totals / Averages</strong></td>
+                                <td><strong>${totalWaitTime.toFixed(1)}</strong><br>(${avgWaitTime.toFixed(2)} avg)</td>
+                                <td><strong>${totalSystemTime.toFixed(1)}</strong><br>(${avgSystemTime.toFixed(2)} avg)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                `;
+            } else {
+                tableHTML = `
+                    <div style="margin: 30px 0; padding: 30px; text-align: center; background-color: #f8f9fa; border-radius: 10px;">
+                        <h4>No Customers Served</h4>
+                        <p>The simulation ended before any customers could be served.</p>
+                        <p>This might be because the simulation time was too short or random numbers were insufficient.</p>
+                    </div>
+                `;
+            }
+            
+            // Create server utilization cards
+            const serverHTML = totalCustomers > 0 ? `
+                <h3 class="results-header">Server Performance</h3>
+                <div class="server-utilization">
+                    <div class="server-card able">
+                        <h4>Able (Server 1)</h4>
+                        <div class="utilization">${(ableUtilization * 100).toFixed(1)}%</div>
+                        <p>Busy: ${ableBusyTime.toFixed(1)} min</p>
+                        <p>Idle: ${ableIdleTime.toFixed(1)} min</p>
+                        <p>Utilization: ${(ableUtilization * 100).toFixed(1)}%</p>
+                    </div>
+                    
+                    <div class="server-card baker">
+                        <h4>Baker (Server 2)</h4>
+                        <div class="utilization">${(bakerUtilization * 100).toFixed(1)}%</div>
+                        <p>Busy: ${bakerBusyTime.toFixed(1)} min</p>
+                        <p>Idle: ${bakerIdleTime.toFixed(1)} min</p>
+                        <p>Utilization: ${(bakerUtilization * 100).toFixed(1)}%</p>
+                    </div>
+                </div>
+            ` : '';
+            
+            // Create summary cards
+            const summaryHTML = totalCustomers > 0 ? `
+                <h3 class="results-header">System Performance Summary</h3>
+                <div class="summary-cards">
+                    <div class="summary-card">
+                        <h4>Average Waiting Time</h4>
+                        <div class="value">${avgWaitTime.toFixed(2)}</div>
+                        <div class="unit">minutes</div>
+                    </div>
+                    <div class="summary-card">
+                        <h4>Probability of Waiting</h4>
+                        <div class="value">${(probWait * 100).toFixed(1)}%</div>
+                        <div class="unit">${numWaiting}/${totalCustomers} customers</div>
+                    </div>
+                    <div class="summary-card">
+                        <h4>Average Time in System</h4>
+                        <div class="value">${avgSystemTime.toFixed(2)}</div>
+                        <div class="unit">minutes</div>
+                    </div>
+                    <div class="summary-card">
+                        <h4>Average Interarrival Time</h4>
+                        <div class="value">${avgInterarrivalTime.toFixed(2)}</div>
+                        <div class="unit">minutes</div>
+                    </div>
+                    <div class="summary-card">
+                        <h4>Customers Served</h4>
+                        <div class="value">${totalCustomers}</div>
+                        <div class="unit">in ${simulationEndTime.toFixed(1)} min</div>
+                    </div>
+                    <div class="summary-card">
+                        <h4>Priority Rule</h4>
+                        <div class="value">${priorityServer.charAt(0).toUpperCase() + priorityServer.slice(1)}</div>
+                        <div class="unit">when both idle</div>
+                    </div>
+                </div>
+            ` : '';
+            
+            // Combine everything
+            document.getElementById('resultsSection').innerHTML = `
+                ${distributionHTML}
+                ${serverHTML}
+                ${summaryHTML}
+                ${tableHTML}
+                
+                <div style="margin-top: 40px; padding: 20px; background-color: #f8f9fa; border-radius: 8px;">
+                    <h4>Simulation Analysis</h4>
+                    <p><strong>Simulation Mode:</strong> ${modeDescription}</p>
+                    ${totalCustomers > 0 ? `
+                    <p>From this simulation:</p>
+                    <ul style="margin-top: 10px;">
+                        <li>Able was busy <strong>${(ableUtilization * 100).toFixed(1)}%</strong> of the time</li>
+                        <li>Baker was busy <strong>${(bakerUtilization * 100).toFixed(1)}%</strong> of the time</li>
+                        <li><strong>${(probWait * 100).toFixed(1)}%</strong> of customers had to wait</li>
+                        <li>Average waiting time was <strong>${avgWaitTime.toFixed(2)} minute(s)</strong></li>
+                    </ul>
+                    ` : '<p>No customers were served in this simulation.</p>'}
+                    <p style="margin-top: 15px; font-style: italic;">Compare with PDF example (1-hour simulation): Able 90% busy, Baker 69% busy, 35% wait probability, 0.42 min average wait</p>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>

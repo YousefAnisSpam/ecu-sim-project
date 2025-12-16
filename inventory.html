@@ -1,0 +1,1426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory System Simulation</title>
+    <style>
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    /* CRITICAL FIX: Add the blue gradient background */
+    body {
+        background: linear-gradient(135deg, #1a2a6c, #2c3e50);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+        color: #333;
+        line-height: 1.6;
+    }
+    
+    .container {
+        max-width: 1600px;
+        width: 100%;
+        background-color: rgba(255, 255, 255, 0.95);
+        border-radius: 15px;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        padding: 20px;
+    }
+    
+    header {
+        background: linear-gradient(135deg, #2c3e50, #4a6491);
+        color: white;
+        padding: 25px;
+        border-radius: 10px;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    
+    h1 {
+        font-size: 2.2rem;
+        margin-bottom: 8px;
+    }
+    
+    .subtitle {
+        font-size: 1.1rem;
+        opacity: 0.9;
+    }
+    
+    .content {
+        background: white;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    }
+        
+        .back-btn {
+            padding: 10px 20px;
+            background-color: #7f8c8d;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-bottom: 25px;
+            transition: background-color 0.3s;
+        }
+        
+        .back-btn:hover {
+            background-color: #636e72;
+        }
+        
+        .input-section {
+            margin: 30px 0;
+            padding: 25px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border-left: 5px solid #3498db;
+        }
+        
+        .input-section h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #3498db;
+        }
+        
+        .input-group {
+            margin: 20px 0;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        input[type="number"], select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        
+        .distribution-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .distribution-table th {
+            background-color: #2c3e50;
+            color: white;
+            padding: 14px;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        .distribution-table td {
+            padding: 12px;
+            border: 1px solid #e1e1e1;
+            text-align: center;
+        }
+        
+        .distribution-table input {
+            width: 100px;
+            padding: 8px;
+            text-align: center;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .add-row-btn, .remove-row-btn {
+            padding: 10px 18px;
+            margin: 8px 5px 8px 0;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .add-row-btn {
+            background-color: #2ecc71;
+            color: white;
+        }
+        
+        .add-row-btn:hover {
+            background-color: #27ae60;
+        }
+        
+        .remove-row-btn {
+            background-color: #e74c3c;
+            color: white;
+        }
+        
+        .remove-row-btn:hover {
+            background-color: #c0392b;
+        }
+        
+        .probability-status {
+            font-weight: bold;
+            margin-left: 20px;
+            padding: 8px 15px;
+            border-radius: 5px;
+        }
+        
+        .probability-error {
+            background-color: #ffeaea;
+            color: #e74c3c;
+        }
+        
+        .probability-ok {
+            background-color: #e8f7ef;
+            color: #27ae60;
+        }
+        
+        .random-input-area {
+            font-family: 'Courier New', monospace;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        
+        textarea.random-numbers-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95rem;
+            resize: vertical;
+        }
+        
+        .input-hint {
+            font-size: 0.85rem;
+            color: #7f8c8d;
+            margin-top: 5px;
+            font-style: italic;
+        }
+        
+        .warning {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 12px;
+            border-radius: 5px;
+            margin: 15px 0;
+            font-size: 0.9rem;
+        }
+        
+        .option-buttons {
+            display: flex;
+            gap: 15px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        .option-btn {
+            padding: 12px 20px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.3s;
+        }
+        
+        .option-btn:hover {
+            background-color: #2980b9;
+        }
+        
+        .simulate-btn {
+            padding: 15px 40px;
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin: 30px 0;
+            transition: all 0.3s;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .simulate-btn:hover {
+            background: linear-gradient(135deg, #27ae60, #219653);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(46, 204, 113, 0.3);
+        }
+        
+        .results-section {
+            margin-top: 40px;
+        }
+        
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 25px 0;
+        }
+        
+        .summary-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+            text-align: center;
+            border-top: 5px solid #3498db;
+        }
+        
+        .summary-card h4 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .summary-card .value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin: 10px 0;
+        }
+        
+        .summary-card .unit {
+            color: #7f8c8d;
+            font-size: 0.85rem;
+        }
+        
+        .simulation-table-container {
+            overflow-x: auto;
+            margin: 30px 0;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            padding: 15px;
+        }
+        
+        .simulation-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            min-width: 1000px;
+        }
+        
+        .simulation-table th {
+            background-color: #2c3e50;
+            color: white;
+            padding: 12px 8px;
+            text-align: center;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+        
+        .simulation-table td {
+            padding: 10px 6px;
+            border-bottom: 1px solid #eee;
+            text-align: center;
+        }
+        
+        .simulation-table tr:hover {
+            background-color: #f5f9ff;
+        }
+        
+        .highlight-shortage {
+            background-color: #ffeaea !important;
+        }
+        
+        .highlight-order {
+            background-color: #e8f4ff !important;
+        }
+        
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            padding: 20px;
+            border-top: 1px solid #eee;
+        }
+        
+        .mapping-example {
+            background-color: #f8f9fa;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            margin: 15px 0;
+            font-size: 0.9rem;
+        }
+        
+        .mapping-example strong {
+            color: #2c3e50;
+        }
+        
+        .results-header {
+            color: #2c3e50;
+            margin: 30px 0 20px 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #3498db;
+        }
+        
+        .parameter-display {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #2ecc71;
+        }
+        
+        .parameter-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+            padding: 5px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .parameter-label {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .parameter-value {
+            font-weight: bold;
+            color: #3498db;
+        }
+        
+        .cycle-header {
+            background-color: #34495e !important;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .shortage-cell {
+            background-color: #ffeaea;
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        
+        .order-cell {
+            background-color: #e8f4ff;
+            color: #2980b9;
+            font-weight: bold;
+        }
+        
+        .arrival-cell {
+            background-color: #d5f4e6;
+            color: #27ae60;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Inventory System Simulation</h1>
+            <p class="subtitle">(M, N) Periodic Review Inventory System Simulation</p>
+        </header>
+        
+        <div class="content">
+            <button class="back-btn" onclick="window.location.href='index.html'">
+                ← Back to Models
+            </button>
+            
+            <h2>(M, N) Periodic Review Inventory System</h2>
+            
+            <div class="parameter-display">
+                <div class="parameter-row">
+                    <span class="parameter-label">M (Maximum Inventory Level):</span>
+                    <span class="parameter-value" id="displayM">11 units</span>
+                </div>
+                <div class="parameter-row">
+                    <span class="parameter-label">N (Review Period Length):</span>
+                    <span class="parameter-value" id="displayN">5 days</span>
+                </div>
+                <div class="parameter-row">
+                    <span class="parameter-label">Number of Cycles:</span>
+                    <span class="parameter-value" id="displayCycles">5 cycles</span>
+                </div>
+            </div>
+            
+            <div class="input-section">
+                <h3>System Parameters</h3>
+                
+                <div class="input-group">
+                    <label for="maxInventory">M (Maximum Inventory Level):</label>
+                    <input type="number" id="maxInventory" min="1" max="100" value="11">
+                    <div class="input-hint">Standard inventory level to maintain</div>
+                </div>
+                
+                <div class="input-group">
+                    <label for="reviewPeriod">N (Review Period Length in days):</label>
+                    <input type="number" id="reviewPeriod" min="1" max="30" value="5">
+                    <div class="input-hint">Days between inventory reviews and orders</div>
+                </div>
+                
+                <div class="input-group">
+                    <label for="numCycles">Number of Cycles to Simulate:</label>
+                    <input type="number" id="numCycles" min="1" max="20" value="5">
+                    <div class="input-hint">Each cycle is N days long</div>
+                </div>
+                
+                <div class="input-group">
+                    <label for="initialInventory">Initial Inventory Level:</label>
+                    <input type="number" id="initialInventory" min="0" max="100" value="3">
+                    <div class="input-hint">Starting inventory at beginning of simulation</div>
+                </div>
+                
+                <div class="input-group">
+                    <label for="initialOrder">Initial Pending Order Quantity:</label>
+                    <input type="number" id="initialOrder" min="0" max="100" value="8">
+                    <div class="input-hint">Order already placed before simulation starts</div>
+                </div>
+                
+                <div class="input-group">
+                    <label for="initialLeadTime">Initial Order Lead Time (days until arrival):</label>
+                    <input type="number" id="initialLeadTime" min="0" max="10" value="2">
+                    <div class="input-hint">Days until initial order arrives</div>
+                </div>
+            </div>
+            
+            <div class="input-section">
+                <h3>Daily Demand Distribution</h3>
+                <p>Define daily demand quantities and their probabilities (Total must equal 1.0000):</p>
+                
+                <table class="distribution-table" id="demandDistributionTable">
+                    <thead>
+                        <tr>
+                            <th>Daily Demand (units)</th>
+                            <th>Probability</th>
+                            <th>Cumulative Probability</th>
+                            <th>Random-Digit Assignment (00-99)</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="demandDistributionBody">
+                        <!-- Rows will be added here -->
+                    </tbody>
+                </table>
+                
+                <div>
+                    <button class="add-row-btn" onclick="addDemandRow()">+ Add Demand Level</button>
+                    <button class="remove-row-btn" onclick="removeLastDemandRow()">- Remove Last</button>
+                    <span id="demandProbTotal" class="probability-status probability-error">Total Probability: 0.0000 (Should be 1.0000)</span>
+                </div>
+                
+                <div class="mapping-example">
+                    <strong>Example from PDF (Page 14):</strong><br>
+                    Daily Demand: 0 (0.10), 1 (0.25), 2 (0.35), 3 (0.21), 4 (0.09)<br>
+                    Random-digit assignments: 01–10, 11–35, 36–70, 71–91, 92–00
+                </div>
+            </div>
+            
+            <div class="input-section">
+                <h3>Lead Time Distribution</h3>
+                <p>Define lead time (days between order and delivery) probabilities (Total must equal 1.0000):</p>
+                
+                <table class="distribution-table" id="leadTimeDistributionTable">
+                    <thead>
+                        <tr>
+                            <th>Lead Time (days)</th>
+                            <th>Probability</th>
+                            <th>Cumulative Probability</th>
+                            <th>Random-Digit Assignment (00-99)</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leadTimeDistributionBody">
+                        <!-- Rows will be added here -->
+                    </tbody>
+                </table>
+                
+                <div>
+                    <button class="add-row-btn" onclick="addLeadTimeRow()">+ Add Lead Time</button>
+                    <button class="remove-row-btn" onclick="removeLastLeadTimeRow()">- Remove Last</button>
+                    <span id="leadTimeProbTotal" class="probability-status probability-error">Total Probability: 0.0000 (Should be 1.0000)</span>
+                </div>
+                
+                <div class="mapping-example">
+                    <strong>Example from PDF (Page 14):</strong><br>
+                    Lead Time: 1 day (0.6), 2 days (0.3), 3 days (0.1)<br>
+                    Random-digit assignments: 01–60, 61–90, 91–00
+                </div>
+            </div>
+            
+            <div class="input-section">
+                <h3>Random Numbers Input</h3>
+                <p>Enter random numbers for demand and lead time (both use 00-99 range):</p>
+                
+                <div class="warning">
+                    <strong>Note:</strong> Both demand and lead time use random numbers 00-99. 100 means 00.
+                </div>
+                
+                <div class="option-buttons">
+                    <button class="option-btn" onclick="generateDemandRandoms()">
+                        Generate Demand Random Numbers
+                    </button>
+                    <button class="option-btn" onclick="generateLeadTimeRandoms()">
+                        Generate Lead Time Random Numbers
+                    </button>
+                    <button class="option-btn" onclick="loadExampleFromPDF()">
+                        Load PDF Example
+                    </button>
+                </div>
+                
+                <div class="input-group">
+                    <label for="demandRandoms">Daily Demand Random Numbers (00-99):</label>
+                    <textarea id="demandRandoms" class="random-numbers-input random-input-area" placeholder="Enter comma-separated random numbers (00-99)" rows="3"></textarea>
+                    <div class="input-hint">Need enough for all days in simulation (N × cycles)</div>
+                </div>
+                
+                <div class="input-group">
+                    <label for="leadTimeRandoms">Lead Time Random Numbers (00-99):</label>
+                    <textarea id="leadTimeRandoms" class="random-numbers-input random-input-area" placeholder="Enter comma-separated random numbers (00-99)" rows="3"></textarea>
+                    <div class="input-hint">Need enough for all orders placed (one per cycle)</div>
+                </div>
+            </div>
+            
+            <button class="simulate-btn" onclick="runInventorySimulation()">
+                Run Inventory Simulation
+            </button>
+            
+            <div class="results-section" id="resultsSection">
+                <!-- Results will be inserted here -->
+            </div>
+        </div>
+        
+        <div class="footer">
+        </div>
+    </div>
+    
+    <script>
+        // Global variables
+        let demandDistribution = [];
+        let leadTimeDistribution = [];
+        let M = 11; // Maximum inventory level
+        let N = 5;  // Review period length
+        let cycles = 5; // Number of cycles to simulate
+        let initialInventory = 3;
+        let initialOrder = 8;
+        let initialLeadTime = 2;
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadExampleFromPDF();
+            updateDemandDistribution();
+            updateLeadTimeDistribution();
+            updateParameterDisplay();
+            
+            // Add event listeners to parameters to update random number hints
+            document.getElementById('maxInventory').addEventListener('change', updateParameterDisplay);
+            document.getElementById('reviewPeriod').addEventListener('change', updateParameterDisplay);
+            document.getElementById('numCycles').addEventListener('change', updateParameterDisplay);
+            document.getElementById('initialInventory').addEventListener('change', updateParameterDisplay);
+            document.getElementById('initialOrder').addEventListener('change', updateParameterDisplay);
+            document.getElementById('initialLeadTime').addEventListener('change', updateParameterDisplay);
+        });
+        
+        // Update parameter display
+        function updateParameterDisplay() {
+            M = parseInt(document.getElementById('maxInventory').value) || 11;
+            N = parseInt(document.getElementById('reviewPeriod').value) || 5;
+            cycles = parseInt(document.getElementById('numCycles').value) || 5;
+            initialInventory = parseInt(document.getElementById('initialInventory').value) || 3;
+            initialOrder = parseInt(document.getElementById('initialOrder').value) || 8;
+            initialLeadTime = parseInt(document.getElementById('initialLeadTime').value) || 2;
+            
+            document.getElementById('displayM').textContent = `${M} units`;
+            document.getElementById('displayN').textContent = `${N} days`;
+            document.getElementById('displayCycles').textContent = `${cycles} cycles`;
+            
+            // Update input hints with current values
+            const totalDays = N * cycles;
+            const demandHint = document.querySelector('textarea#demandRandoms').previousElementSibling.nextElementSibling;
+            const leadTimeHint = document.querySelector('textarea#leadTimeRandoms').previousElementSibling.nextElementSibling;
+            
+            if (demandHint && demandHint.classList.contains('input-hint')) {
+                demandHint.textContent = `Need enough for all days in simulation (${N} × ${cycles} = ${totalDays} days)`;
+            }
+            
+            if (leadTimeHint && leadTimeHint.classList.contains('input-hint')) {
+                leadTimeHint.textContent = `Need enough for all orders placed (one per cycle = ${cycles} numbers)`;
+            }
+        }
+        
+        // Demand distribution functions
+        function addDemandRow(demand = '', prob = '') {
+            const tbody = document.getElementById('demandDistributionBody');
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td><input type="number" class="demand-value" value="${demand}" min="0" max="100" placeholder="e.g., 0"></td>
+                <td><input type="number" class="demand-prob" value="${prob}" min="0" max="1" step="0.01" placeholder="0.10"></td>
+                <td class="demand-cumulative">0.0000</td>
+                <td class="demand-range">01-01</td>
+                <td><button onclick="this.parentElement.parentElement.remove(); updateDemandDistribution()" style="padding: 5px 10px; background: #e74c3c; color: white; border: none; border-radius: 3px; cursor: pointer;">Remove</button></td>
+            `;
+            tbody.appendChild(row);
+            
+            // Add event listeners to inputs
+            row.querySelector('.demand-value').addEventListener('input', updateDemandDistribution);
+            row.querySelector('.demand-prob').addEventListener('input', updateDemandDistribution);
+            
+            updateDemandDistribution();
+        }
+        
+        function removeLastDemandRow() {
+            const tbody = document.getElementById('demandDistributionBody');
+            if (tbody.children.length > 0) {
+                tbody.lastElementChild.remove();
+                updateDemandDistribution();
+            }
+        }
+        
+        // Lead time distribution functions
+        function addLeadTimeRow(time = '', prob = '') {
+            const tbody = document.getElementById('leadTimeDistributionBody');
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td><input type="number" class="lead-time-value" value="${time}" min="1" max="30" placeholder="e.g., 1"></td>
+                <td><input type="number" class="lead-time-prob" value="${prob}" min="0" max="1" step="0.01" placeholder="0.60"></td>
+                <td class="lead-time-cumulative">0.0000</td>
+                <td class="lead-time-range">01-01</td>
+                <td><button onclick="this.parentElement.parentElement.remove(); updateLeadTimeDistribution()" style="padding: 5px 10px; background: #e74c3c; color: white; border: none; border-radius: 3px; cursor: pointer;">Remove</button></td>
+            `;
+            tbody.appendChild(row);
+            
+            // Add event listeners to inputs
+            row.querySelector('.lead-time-value').addEventListener('input', updateLeadTimeDistribution);
+            row.querySelector('.lead-time-prob').addEventListener('input', updateLeadTimeDistribution);
+            
+            updateLeadTimeDistribution();
+        }
+        
+        function removeLastLeadTimeRow() {
+            const tbody = document.getElementById('leadTimeDistributionBody');
+            if (tbody.children.length > 0) {
+                tbody.lastElementChild.remove();
+                updateLeadTimeDistribution();
+            }
+        }
+        
+        // Update distribution tables (both use 00-99 range)
+        function updateDistribution(tableId, distributionArray, probClass, valueClass, cumClass, rangeClass, totalId) {
+            const rows = document.getElementById(tableId).getElementsByTagName('tbody')[0].children;
+            let totalProb = 0;
+            let cumulative = 0;
+            
+            distributionArray.length = 0; // Clear array
+            
+            // Collect data
+            const probabilities = [];
+            for (let i = 0; i < rows.length; i++) {
+                const row = rows[i];
+                const value = parseFloat(row.querySelector('.' + valueClass).value) || 0;
+                const prob = parseFloat(row.querySelector('.' + probClass).value) || 0;
+                
+                if (value >= 0 && prob > 0) {
+                    probabilities.push({value: value, prob: prob});
+                    totalProb += prob;
+                }
+            }
+            
+            if (probabilities.length === 0) {
+                const totalElement = document.getElementById(totalId);
+                totalElement.textContent = `Total Probability: 0.0000 (Should be 1.0000)`;
+                totalElement.className = 'probability-status probability-error';
+                return;
+            }
+            
+            // Sort by value
+            probabilities.sort((a, b) => a.value - b.value);
+            
+            // Calculate ranges using 00-99 (100 total)
+            let currentRangeStart = 1;
+            let slotTotal = 0;
+            
+            for (let i = 0; i < probabilities.length; i++) {
+                const {value, prob} = probabilities[i];
+                
+                // Calculate how many slots (1-100) this probability gets
+                const slots = Math.round(prob * 100);
+                slotTotal += slots;
+                
+                let endRange;
+                if (i === probabilities.length - 1) {
+                    endRange = 100; // Last item goes to 100
+                } else {
+                    endRange = currentRangeStart + slots - 1;
+                }
+                
+                // Handle wrap-around: if endRange > 100, show as 00
+                let displayEndRange = endRange;
+                if (endRange === 100) {
+                    displayEndRange = 0; // Show as 00 for display
+                }
+                
+                cumulative += prob;
+                
+                // Store in distribution array
+                distributionArray.push({
+                    value: value,
+                    probability: prob,
+                    cumulative: cumulative,
+                    startRange: currentRangeStart,
+                    endRange: endRange,
+                    displayEndRange: displayEndRange
+                });
+                
+                // Update display
+                if (rows[i]) {
+                    rows[i].querySelector('.' + cumClass).textContent = cumulative.toFixed(4);
+                    rows[i].querySelector('.' + rangeClass).textContent = 
+                        `${String(currentRangeStart).padStart(2, '0')}–${String(displayEndRange).padStart(2, '0')}`;
+                }
+                
+                currentRangeStart = endRange + 1;
+                if (currentRangeStart > 100) currentRangeStart = 1;
+            }
+            
+            // Update total probability display
+            const totalElement = document.getElementById(totalId);
+            const tolerance = 0.001; // Allow small floating point errors
+            
+            if (Math.abs(totalProb - 1.0) < tolerance) {
+                totalElement.textContent = `Total Probability: ${totalProb.toFixed(4)} ✓`;
+                totalElement.className = 'probability-status probability-ok';
+            } else {
+                totalElement.textContent = `Total Probability: ${totalProb.toFixed(4)} (Should be 1.0000)`;
+                totalElement.className = 'probability-status probability-error';
+            }
+        }
+        
+        function updateDemandDistribution() {
+            updateDistribution('demandDistributionTable', demandDistribution, 
+                'demand-prob', 'demand-value', 'demand-cumulative', 'demand-range', 'demandProbTotal');
+        }
+        
+        function updateLeadTimeDistribution() {
+            updateDistribution('leadTimeDistributionTable', leadTimeDistribution, 
+                'lead-time-prob', 'lead-time-value', 'lead-time-cumulative', 'lead-time-range', 'leadTimeProbTotal');
+        }
+        
+        // Random number generation functions - UPDATED to use current parameter values
+        function generateDemandRandoms() {
+            // Get current parameter values
+            updateParameterDisplay();
+            const totalDays = N * cycles;
+            
+            if (totalDays <= 0) {
+                alert('Please enter valid values for N (Review Period) and Cycles');
+                return;
+            }
+            
+            let randomNumbers = [];
+            
+            for (let i = 0; i < totalDays; i++) {
+                randomNumbers.push(Math.floor(Math.random() * 100));
+            }
+            
+            document.getElementById('demandRandoms').value = randomNumbers.join(', ');
+            alert(`Generated ${totalDays} demand random numbers (00-99) for ${cycles} cycles of ${N} days each (total ${totalDays} days)`);
+            
+            console.log('Generated demand randoms:', randomNumbers); // Debug log
+        }
+        
+        function generateLeadTimeRandoms() {
+            // Get current parameter values
+            updateParameterDisplay();
+            
+            if (cycles <= 0) {
+                alert('Please enter a valid number of cycles');
+                return;
+            }
+            
+            let randomNumbers = [];
+            
+            for (let i = 0; i < cycles; i++) {
+                randomNumbers.push(Math.floor(Math.random() * 100));
+            }
+            
+            document.getElementById('leadTimeRandoms').value = randomNumbers.join(', ');
+            alert(`Generated ${cycles} lead time random numbers (00-99) for ${cycles} cycles`);
+            
+            console.log('Generated lead time randoms:', randomNumbers); // Debug log
+        }
+        
+        // Load example from PDF
+        function loadExampleFromPDF() {
+            // Clear existing rows
+            document.getElementById('demandDistributionBody').innerHTML = '';
+            document.getElementById('leadTimeDistributionBody').innerHTML = '';
+            
+            // Load demand distribution from PDF (Page 14)
+            const demandData = [
+                {value: 0, prob: 0.10},
+                {value: 1, prob: 0.25},
+                {value: 2, prob: 0.35},
+                {value: 3, prob: 0.21},
+                {value: 4, prob: 0.09}
+            ];
+            
+            demandData.forEach(data => {
+                addDemandRow(data.value, data.prob);
+            });
+            
+            // Load lead time distribution from PDF (Page 14)
+            const leadTimeData = [
+                {value: 1, prob: 0.60},
+                {value: 2, prob: 0.30},
+                {value: 3, prob: 0.10}
+            ];
+            
+            leadTimeData.forEach(data => {
+                addLeadTimeRow(data.value, data.prob);
+            });
+            
+            // Load random numbers from PDF example (Pages 19-54)
+            const demandRandoms = [24, 35, 65, 81, 54, 3, 87, 27, 73, 70, 47, 45, 48, 17, 9, 42, 87, 26, 36, 40, 7, 63, 19, 88, 94];
+            
+            // Lead time randoms from PDF: 
+            const leadTimeRandoms = [5, 0, 3, 4, 8];
+            
+            document.getElementById('demandRandoms').value = demandRandoms.join(', ');
+            document.getElementById('leadTimeRandoms').value = leadTimeRandoms.join(', ');
+            
+            // Set parameters from PDF
+            document.getElementById('maxInventory').value = 11;
+            document.getElementById('reviewPeriod').value = 5;
+            document.getElementById('numCycles').value = 5;
+            document.getElementById('initialInventory').value = 3;
+            document.getElementById('initialOrder').value = 8;
+            document.getElementById('initialLeadTime').value = 2;
+            
+            // Update distributions and display
+            updateDemandDistribution();
+            updateLeadTimeDistribution();
+            updateParameterDisplay();
+            
+            alert('Loaded PDF example successfully! This simulates a (11, 5) inventory system for 5 cycles (25 days).');
+        }
+        
+        // Utility functions
+        function normalizeRandomNumber(num) {
+            let n = parseInt(num);
+            
+            if (isNaN(n)) return 1;
+            if (n === 0 || n === 100) return 100;
+            if (n > 100) return 100;
+            if (n < 1) return 1;
+            
+            return n;
+        }
+        
+        function mapRandomToValue(randomDigit, distribution) {
+            const randomValue = normalizeRandomNumber(randomDigit);
+            
+            if (distribution.length === 0) {
+                alert('Please define distribution first');
+                return 1;
+            }
+            
+            // Find which range the random number falls into
+            for (let dist of distribution) {
+                const start = dist.startRange;
+                const end = dist.endRange;
+                
+                if (randomValue >= start && randomValue <= end) {
+                    return dist.value;
+                }
+                
+                // Special case for wrap-around (100 becomes 00)
+                if (end === 100 && randomValue === 0) {
+                    return dist.value;
+                }
+            }
+            
+            // If not found, use last distribution
+            return distribution[distribution.length - 1].value;
+        }
+        
+        // Main simulation function
+        function runInventorySimulation() {
+            // Get parameters
+            updateParameterDisplay();
+            
+            // Validate distributions
+            if (demandDistribution.length === 0) {
+                alert('Please define daily demand distribution');
+                return;
+            }
+            
+            if (leadTimeDistribution.length === 0) {
+                alert('Please define lead time distribution');
+                return;
+            }
+            
+            // Check if probabilities sum to 1
+            const demandTotal = demandDistribution.reduce((sum, dist) => sum + dist.probability, 0);
+            const leadTimeTotal = leadTimeDistribution.reduce((sum, dist) => sum + dist.probability, 0);
+            const tolerance = 0.001;
+            
+            if (Math.abs(demandTotal - 1.0) > tolerance) {
+                alert('Demand probabilities must sum to exactly 1.0000');
+                return;
+            }
+            
+            if (Math.abs(leadTimeTotal - 1.0) > tolerance) {
+                alert('Lead time probabilities must sum to exactly 1.0000');
+                return;
+            }
+            
+            // Parse random numbers
+            const demandInput = document.getElementById('demandRandoms').value.trim();
+            const leadTimeInput = document.getElementById('leadTimeRandoms').value.trim();
+            
+            if (!demandInput || !leadTimeInput) {
+                alert('Please provide random numbers for both demand and lead time');
+                return;
+            }
+            
+            // Parse and normalize random numbers (both use 00-99)
+            const demandRandoms = demandInput.split(',')
+                .map(r => r.trim())
+                .filter(r => r !== '')
+                .map(normalizeRandomNumber);
+            
+            const leadTimeRandoms = leadTimeInput.split(',')
+                .map(r => r.trim())
+                .filter(r => r !== '')
+                .map(normalizeRandomNumber);
+            
+            // Check if we have enough random numbers
+            const totalDays = N * cycles;
+            if (demandRandoms.length < totalDays) {
+                alert(`Need ${totalDays} demand random numbers for ${cycles} cycles of ${N} days, got ${demandRandoms.length}`);
+                return;
+            }
+            
+            if (leadTimeRandoms.length < cycles) {
+                alert(`Need at least ${cycles} lead time random numbers for ${cycles} cycles, got ${leadTimeRandoms.length}`);
+                return;
+            }
+            
+            // Run simulation
+            const simulation = simulateInventorySystem(demandRandoms, leadTimeRandoms);
+            
+            // Display results
+            displayInventoryResults(simulation);
+        }
+        
+        function simulateInventorySystem(demandRandoms, leadTimeRandoms) {
+            let simulationData = [];
+            let pendingOrders = [];
+            let totalShortageDays = 0;
+            let totalEndingInventory = 0;
+            let totalOrderQuantity = 0;
+
+            // Initial pending order
+            if (initialOrder > 0 && initialLeadTime > 0) {
+                pendingOrders.push({
+                    quantity: initialOrder,
+                    daysUntilArrival: initialLeadTime,
+                    orderCycle: 0
+                });
+            }
+
+            let inventory = initialInventory;
+            let randomIndex = 0;
+            let leadTimeIndex = 0;
+            let cumulativeShortage = 0; // FIX: Global cumulative shortage that carries over cycles
+
+            for (let cycle = 1; cycle <= cycles; cycle++) {
+                // FIX: Don't reset cumulative shortage at start of each cycle
+                // It should carry over from previous cycle
+
+                for (let day = 1; day <= N; day++) {
+                    
+                    /* ================================
+                       1️⃣ START OF DAY: HANDLE ARRIVALS (FIXED LOGIC)
+                       ================================ */
+                    let arrivedQuantity = 0;
+                    
+                    // DECREMENT daysUntilArrival FIRST (as in fixed example)
+                    pendingOrders.forEach(o => o.daysUntilArrival--);
+                    
+                    // Check for arrivals (daysUntilArrival < 0 means order arrives)
+                    for (let i = pendingOrders.length - 1; i >= 0; i--) {
+                        if (pendingOrders[i].daysUntilArrival < 0) {
+                            arrivedQuantity += pendingOrders[i].quantity;
+                            pendingOrders.splice(i, 1);
+                        }
+                    }
+                    
+                    inventory += arrivedQuantity;
+                    
+                    // FIX: When order arrives, apply it to reduce backlog/shortage
+                    // If we have arrival and there's cumulative shortage, reduce it
+                    if (arrivedQuantity > 0 && cumulativeShortage > 0) {
+                        // Use arrived inventory to cover backlog
+                        if (inventory >= cumulativeShortage) {
+                            // All shortage can be covered
+                            inventory -= cumulativeShortage;
+                            cumulativeShortage = 0;
+                        } else {
+                            // Partially cover shortage
+                            cumulativeShortage -= inventory;
+                            inventory = 0;
+                        }
+                    }
+
+                    /* ================================
+                       2️⃣ DEMAND OCCURS
+                       ================================ */
+                    const demandRandom = demandRandoms[randomIndex++];
+                    const demand = mapRandomToValue(demandRandom, demandDistribution);
+
+                    let endingInventory = inventory - demand;
+                    let shortage = 0;
+
+                    if (endingInventory < 0) {
+                        shortage = Math.abs(endingInventory);
+                        cumulativeShortage += shortage; // FIX: Add to GLOBAL cumulative shortage
+                        totalShortageDays++;
+                        endingInventory = 0;
+                    }
+
+                    /* ================================
+                       3️⃣ END OF CYCLE → PLACE ORDER
+                       ================================ */
+                    let orderQuantity = 0;
+                    let leadTime = '-';
+                    let leadTimeRandom = '-';
+                    let daysUntilOrderArrives = '-';
+
+                    if (day === N) {
+                        // FIX: Use GLOBAL cumulative shortage in order formula
+                        orderQuantity = M - endingInventory + cumulativeShortage;
+                        totalOrderQuantity += orderQuantity;
+
+                        if (orderQuantity > 0) {
+                            leadTimeRandom = leadTimeRandoms[leadTimeIndex++];
+                            leadTime = mapRandomToValue(leadTimeRandom, leadTimeDistribution);
+
+                            pendingOrders.push({
+                                quantity: orderQuantity,
+                                daysUntilArrival: leadTime,
+                                orderCycle: cycle
+                            });
+
+                            daysUntilOrderArrives = leadTime;
+                        }
+                        
+                        // FIX: After placing order, cumulative shortage is NOT reset to 0
+                        // It continues to the next cycle until orders arrive to cover it
+                    }
+
+                    /* ================================
+                       4️⃣ DISPLAY NEXT ARRIVAL
+                       ================================ */
+                    let nextArrival = '-';
+                    if (pendingOrders.length > 0) {
+                        // Show the minimum daysUntilArrival (which may be 0 or negative for arrivals today)
+                        nextArrival = Math.min(...pendingOrders.map(o => o.daysUntilArrival));
+                        // Adjust display: if negative, show as 0 (arriving today)
+                        if (nextArrival < 0) nextArrival = 0;
+                    }
+
+                    simulationData.push({
+                        cycle,
+                        day,
+                        beginningInventory: inventory,
+                        demandRandom,
+                        demand,
+                        endingInventory,
+                        shortage,
+                        cumulativeShortage: cumulativeShortage, // FIX: Show GLOBAL cumulative shortage
+                        orderQuantity,
+                        leadTimeRandom,
+                        leadTime,
+                        daysUntilOrderArrives: day === N ? daysUntilOrderArrives : nextArrival,
+                        orderArrivedToday: arrivedQuantity > 0,
+                        arrivedOrderQuantity: arrivedQuantity
+                    });
+
+                    inventory = endingInventory;
+                    totalEndingInventory += endingInventory;
+                }
+            }
+
+            // Calculate performance metrics
+            const avgEndingInventory = simulationData.length > 0 ? totalEndingInventory / simulationData.length : 0;
+            const shortagePercentage = simulationData.length > 0 ? (totalShortageDays / simulationData.length) * 100 : 0;
+            const avgOrderQuantity = cycles > 0 ? totalOrderQuantity / cycles : 0;
+
+            return {
+                simulationData: simulationData,
+                parameters: {
+                    M: M,
+                    N: N,
+                    cycles: cycles,
+                    initialInventory: initialInventory,
+                    initialOrder: initialOrder,
+                    initialLeadTime: initialLeadTime
+                },
+                performance: {
+                    avgEndingInventory: avgEndingInventory,
+                    totalShortageDays: totalShortageDays,
+                    shortagePercentage: shortagePercentage,
+                    totalOrderQuantity: totalOrderQuantity,
+                    avgOrderQuantity: avgOrderQuantity,
+                    totalDays: simulationData.length,
+                    finalCumulativeShortage: cumulativeShortage
+                }
+            };
+        }
+        
+        function displayInventoryResults(simulation) {
+            const { simulationData, parameters, performance } = simulation;
+            const totalDays = parameters.N * parameters.cycles;
+            
+            // Create distribution tables
+            let distributionHTML = `
+                <h3 class="results-header">Input Distributions</h3>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px;">
+                    <div>
+                        <h4>Daily Demand Distribution</h4>
+                        <table class="distribution-table">
+                            <thead>
+                                <tr>
+                                    <th>Daily Demand</th>
+                                    <th>Probability</th>
+                                    <th>Cumulative</th>
+                                    <th>Random Number Range (00-99)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+            `;
+            
+            demandDistribution.forEach(dist => {
+                distributionHTML += `
+                    <tr>
+                        <td>${dist.value} units</td>
+                        <td>${dist.probability.toFixed(4)}</td>
+                        <td>${dist.cumulative.toFixed(4)}</td>
+                        <td>${String(dist.startRange).padStart(2, '0')}-${String(dist.endRange === 100 ? 0 : dist.endRange).padStart(2, '0')}</td>
+                    </tr>
+                `;
+            });
+            
+            distributionHTML += `
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div>
+                        <h4>Lead Time Distribution</h4>
+                        <table class="distribution-table">
+                            <thead>
+                                <tr>
+                                    <th>Lead Time</th>
+                                    <th>Probability</th>
+                                    <th>Cumulative</th>
+                                    <th>Random Number Range (00-99)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+            `;
+            
+            leadTimeDistribution.forEach(dist => {
+                distributionHTML += `
+                    <tr>
+                        <td>${dist.value} days</td>
+                        <td>${dist.probability.toFixed(4)}</td>
+                        <td>${dist.cumulative.toFixed(4)}</td>
+                        <td>${String(dist.startRange).padStart(2, '0')}-${String(dist.endRange === 100 ? 0 : dist.endRange).padStart(2, '0')}</td>
+                    </tr>
+                `;
+            });
+            
+            distributionHTML += `
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+            
+            // Create simulation table - EXACTLY as requested
+            let tableHTML = '';
+            if (simulationData.length > 0) {
+                tableHTML = `
+                    <h3 class="results-header">Simulation Table - (M=${parameters.M}, N=${parameters.N}) System</h3>
+                    <div style="margin-bottom: 15px; padding: 10px; background-color: #e8f4ff; border-radius: 5px;">
+                        <strong>Simulation Results:</strong> ${parameters.cycles} cycles × ${parameters.N} days = ${totalDays} total days
+                        <br>Initial Inventory: ${parameters.initialInventory} units | Initial Order: ${parameters.initialOrder} units arriving in ${parameters.initialLeadTime} days
+                        <br><strong>Order Formula:</strong> Q = M - Ending Inventory + Cumulative Shortage
+                        <br><strong>Note:</strong> Cumulative shortage carries over between cycles until covered by arriving orders
+                    </div>
+                    <div class="simulation-table-container">
+                        <table class="simulation-table">
+                            <thead>
+                                <tr>
+                                    <th>Cycle</th>
+                                    <th>Day</th>
+                                    <th>Beginning Inventory</th>
+                                    <th>Random Digits for Demand</th>
+                                    <th>Demand</th>
+                                    <th>Ending Inventory</th>
+                                    <th>Shortage Quantity</th>
+                                    <th>Cumulative Shortage</th>
+                                    <th>Order Quantity</th>
+                                    <th>Random Digits for Lead Time</th>
+                                    <th>Days Until Order Arrives</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                `;
+                
+                let currentCycle = 0;
+                simulationData.forEach((dayData, index) => {
+                    // Add cycle separator row
+                    if (dayData.cycle !== currentCycle) {
+                        currentCycle = dayData.cycle;
+                        tableHTML += `
+                            <tr class="cycle-header">
+                                <td colspan="11"><strong>Cycle ${dayData.cycle} (Days ${(dayData.cycle-1)*parameters.N + 1} to ${dayData.cycle*parameters.N})</strong></td>
+                            </tr>
+                        `;
+                    }
+                    
+                    // Determine row classes
+                    let rowClass = '';
+                    if (dayData.shortage > 0) rowClass = 'highlight-shortage';
+                    if (dayData.orderQuantity > 0) rowClass = 'highlight-order';
+                    if (dayData.orderArrivedToday) rowClass = 'arrival-cell';
+                    
+                    tableHTML += `
+                        <tr class="${rowClass}">
+                            <td>${dayData.cycle}</td>
+                            <td>${dayData.day}</td>
+                            <td>${dayData.beginningInventory}${dayData.orderArrivedToday ? ` (+${dayData.arrivedOrderQuantity})` : ''}</td>
+                            <td>${String(dayData.demandRandom).padStart(2, '0')}</td>
+                            <td>${dayData.demand}</td>
+                            <td>${dayData.endingInventory}</td>
+                            <td class="${dayData.shortage > 0 ? 'shortage-cell' : ''}">${dayData.shortage}</td>
+                            <td class="${dayData.cumulativeShortage > 0 ? 'shortage-cell' : ''}">${dayData.cumulativeShortage}</td>
+                            <td class="${dayData.orderQuantity > 0 ? 'order-cell' : ''}">${dayData.orderQuantity > 0 ? dayData.orderQuantity : '-'}</td>
+                            <td>${dayData.leadTimeRandom}</td>
+                            <td>${dayData.daysUntilOrderArrives}</td>
+                        </tr>
+                    `;
+                });
+                
+                tableHTML += `
+                            <tr style="background-color: #f8f9fa; font-weight: bold;">
+                                <td colspan="6"><strong>Totals / Averages</strong></td>
+                                <td><strong>${performance.avgEndingInventory.toFixed(2)}</strong><br>(avg)</td>
+                                <td><strong>${performance.totalShortageDays}</strong><br>days</td>
+                                <td><strong>${performance.finalCumulativeShortage}</strong><br>final backlog</td>
+                                <td colspan="2"><strong>${performance.totalOrderQuantity}</strong><br>total ordered</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                `;
+            } else {
+                tableHTML = `
+                    <div style="margin: 30px 0; padding: 30px; text-align: center; background-color: #f8f9fa; border-radius: 10px;">
+                        <h4>No Simulation Data</h4>
+                        <p>No simulation data was generated. Please check your inputs and try again.</p>
+                    </div>
+                `;
+            }
+            
+            // Create performance summary
+            const summaryHTML = simulationData.length > 0 ? `
+                <h3 class="results-header">Performance Analysis</h3>
+                <div class="summary-cards">
+                    <button onclick="exportToExcel()" style="grid-column: 1 / -1; padding: 10px; background: #2ecc71; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">📥 Export to Excel</button>
+                    <div class="summary-card">
+                        <h4>Average Ending Inventory</h4>
+                        <div class="value">${performance.avgEndingInventory.toFixed(2)}</div>
+                        <div class="unit">units per day</div>
+                    </div>
+                    <div class="summary-card">
+                        <h4>Shortage Days</h4>
+                        <div class="value">${performance.totalShortageDays}</div>
+                        <div class="unit">${performance.shortagePercentage.toFixed(1)}% of days</div>
+                    </div>
+                    <div class="summary-card">
+                        <h4>Average Order Quantity</h4>
+                        <div class="value">${performance.avgOrderQuantity.toFixed(2)}</div>
+                        <div class="unit">units per cycle</div>
+                    </div>
+                    <div class="summary-card">
+                        <h4>Total Orders Placed</h4>
+                        <div class="value">${parameters.cycles}</div>
+                        <div class="unit">${performance.totalOrderQuantity} total units</div>
+                    </div>
+                    <div class="summary-card">
+                        <h4>Final Backlog</h4>
+                        <div class="value">${performance.finalCumulativeShortage}</div>
+                        <div class="unit">units still pending</div>
+                    </div>
+                    <div class="summary-card">
+                        <h4>System Parameters</h4>
+                        <div class="value">M=${parameters.M}</div>
+                        <div class="unit">N=${parameters.N}</div>
+                    </div>
+                </div>
+            ` : '';
+            
+            // Combine everything
+            document.getElementById('resultsSection').innerHTML = `
+                ${distributionHTML}
+                ${summaryHTML}
+                ${tableHTML}
+                
+                <div style="margin-top: 40px; padding: 20px; background-color: #f8f9fa; border-radius: 8px;">
+                    <h4>Simulation Analysis</h4>
+                    <p><strong>(M, N) Inventory System Analysis:</strong> This simulation models a periodic review inventory system where:</p>
+                    <ul style="margin-top: 10px;">
+                        <li><strong>M = ${parameters.M}</strong> is the maximum inventory level (target)</li>
+                        <li><strong>N = ${parameters.N}</strong> is the review period (days between orders)</li>
+                        <li>At the end of each ${parameters.N}-day cycle, we order using formula: <strong>Q = M - Ending Inventory + Cumulative Shortage</strong></li>
+                        <li><strong>Cumulative shortage carries over between cycles</strong> until covered by arriving orders</li>
+                        <li>When orders arrive, they first reduce cumulative shortage before becoming available inventory</li>
+                        <li>"Days Until Order Arrives" counts down daily. When it reaches 0, order arrives at beginning of NEXT day.</li>
+                    </ul>
+                    ${simulationData.length > 0 ? `
+                    <p style="margin-top: 15px;">From this simulation:</p>
+                    <ul style="margin-top: 10px;">
+                        <li>Average ending inventory: <strong>${performance.avgEndingInventory.toFixed(2)} units</strong></li>
+                        <li>Shortages occurred on <strong>${performance.totalShortageDays} days (${performance.shortagePercentage.toFixed(1)}%)</strong></li>
+                        <li>Average order quantity: <strong>${performance.avgOrderQuantity.toFixed(2)} units</strong></li>
+                        <li>Total units ordered: <strong>${performance.totalOrderQuantity} units</strong> over ${parameters.cycles} cycles</li>
+                        <li>Final backlog: <strong>${performance.finalCumulativeShortage} units</strong> still pending</li>
+                    </ul>
+                    <p style="margin-top: 15px; font-style: italic;">Compare with PDF example (Page 56): Average ending inventory ≈ 3.5 units, shortages on 2 of 25 days</p>
+                    ` : ''}
+                </div>
+            `;
+        }
+        
+        // Added debug function to test if buttons are working
+        function testButton() {
+            console.log('Button clicked!');
+            alert('Button is working!');
+        }
+    </script>
+</body>
+</html>
