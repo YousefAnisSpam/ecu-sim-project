@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Random Number Tests</title>
+    <!-- Add SheetJS library for Excel export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- Add jsPDF library for PDF export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
     button {
         background-color: #4a6fa5;
@@ -443,8 +448,167 @@
         font-weight: bold;
         color: #2c3e50;
     }
+    
+    /* Export buttons styles */
+    .export-buttons {
+        display: flex;
+        gap: 15px;
+        margin: 25px 0;
+        flex-wrap: wrap;
+    }
+    
+    .export-btn {
+        padding: 12px 25px;
+        background-color: #3498db;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 180px;
+    }
+    
+    .export-btn.pdf {
+        background-color: #e74c3c;
+    }
+    
+    .export-btn.pdf:hover {
+        background-color: #c0392b;
+    }
+    
+    .export-btn.excel {
+        background-color: #2ecc71;
+    }
+    
+    .export-btn.excel:hover {
+        background-color: #27ae60;
+    }
+    
+    .export-btn:hover {
+        background-color: #2980b9;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    /* RNG Method Styles */
+    .rng-method-btn {
+        padding: 10px 20px;
+        border: 2px solid #3498db;
+        background-color: white;
+        color: #3498db;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+    
+    .rng-method-btn:hover, .rng-method-btn.active {
+        background-color: #3498db;
+        color: white;
+    }
+    
+    .rng-controls {
+        background-color: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+    }
+    
+    .rng-method-config {
+        background-color: white;
+        padding: 15px;
+        border-radius: 5px;
+        border: 1px solid #e0e0e0;
+    }
+    
+    .rng-preview {
+        margin-top: 15px;
+        padding: 15px;
+        background-color: #f0f8ff;
+        border-radius: 5px;
+        border: 1px solid #ddd;
+        font-family: 'Courier New', monospace;
+        font-size: 0.9rem;
+        max-height: 150px;
+        overflow-y: auto;
+    }
+    
+    /* Notification styles */
+    .notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 15px 20px;
+        border-radius: 5px;
+        color: white;
+        font-weight: 600;
+        z-index: 1000;
+        animation: slideIn 0.3s ease-out;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+    
+    @keyframes slideOut {
+        from {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        to {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+    }
+    
+    /* Auto-export section */
+    .auto-export-section {
+        background-color: #f0f8ff;
+        border: 2px solid #3498db;
+        border-radius: 8px;
+        padding: 20px;
+        margin-top: 25px;
+        text-align: center;
+    }
+    
+    .auto-export-section h3 {
+        margin-top: 0;
+        color: #2c3e50;
+        border-bottom: 1px solid #3498db;
+        padding-bottom: 10px;
+    }
+    
+    .auto-export-options {
+        display: flex;
+        gap: 20px;
+        justify-content: center;
+        margin-top: 15px;
+        flex-wrap: wrap;
+    }
+    
+    .auto-export-option {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .auto-export-option input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+    }
 </style>
-    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
@@ -463,6 +627,10 @@
                 <div class="range-info">
                     <strong>FIXED RANGE:</strong> All random numbers are between 0 and 1<br>
                     This range cannot be changed or altered
+                </div>
+                
+                <div class="button-group">
+                    <!-- RNG Methods Section will be added by JavaScript -->
                 </div>
                 
                 <div class="input-group">
@@ -498,6 +666,33 @@
                 
                 <div id="randomNumbers" class="numbers-display">
                     Generated numbers will appear here...
+                </div>
+                
+                <!-- Auto Export Options -->
+                <div class="auto-export-section">
+                    <h3>Automatic Export Options</h3>
+                    <div class="auto-export-options">
+                        <div class="auto-export-option">
+                            <input type="checkbox" id="autoExcel" checked>
+                            <label for="autoExcel">Auto-export to Excel after tests</label>
+                        </div>
+                        <div class="auto-export-option">
+                            <input type="checkbox" id="autoPDF" checked>
+                            <label for="autoPDF">Auto-print PDF after tests</label>
+                        </div>
+                    </div>
+                    <p style="margin-top: 10px; font-size: 0.9em; color: #666;">
+                        These exports will automatically run after completing any test
+                    </p>
+                </div>
+                
+                <div class="export-buttons" id="exportButtons" style="display: none;">
+                    <button class="export-btn pdf" onclick="generatePDF()">
+                        📄 Generate PDF Report
+                    </button>
+                    <button class="export-btn excel" onclick="exportToExcel()">
+                        📊 Export to Excel
+                    </button>
                 </div>
                 
                 <div class="input-group" style="margin-top: 15px;">
@@ -609,6 +804,13 @@
         let randomNumbers = [];
         const FIXED_MIN = 0;
         const FIXED_MAX = 1;
+        
+        // RNG variables
+        let currentRNGMethod = 'middleSquare'; // 'middleSquare' or 'linearCongruential'
+        let lastGeneratedNumbers = [];
+        let uniformityResults = null;
+        let dependencyResults = null;
+        let exportButtonsVisible = false;
 
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
@@ -637,9 +839,308 @@
             
             // Set fixed range display
             updateRangeDisplay();
+            
+            // Initialize RNG methods
+            setupRNGMethods();
         });
+        
+        // Setup RNG methods
+        function setupRNGMethods() {
+            // Add RNG method selection UI
+            const generateSection = document.querySelector('.test-section:first-child');
+            const rangeInfo = document.querySelector('.range-info');
+            
+            if (rangeInfo) {
+                const rngMethodHTML = `
+                    <div style="margin-top: 20px; padding: 20px; background-color: #f8f9fa; border-radius: 8px; border-left: 4px solid #3498db;">
+                        <h3 style="margin-top: 0; color: #2c3e50;">Random Number Generation Methods</h3>
+                        <div class="rng-controls">
+                            <div style="display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap;">
+                                <button class="rng-method-btn active" onclick="selectRNGMethod('middleSquare')">Middle-Square Method</button>
+                                <button class="rng-method-btn" onclick="selectRNGMethod('linearCongruential')">Linear Congruential Generator (LCG)</button>
+                            </div>
+                            
+                            <!-- Middle-Square Method -->
+                            <div class="rng-method-config" id="middleSquareConfig" style="margin-bottom: 15px;">
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                                    <div>
+                                        <label style="display: block; margin-bottom: 5px; font-weight: bold;">Seed (any number):</label>
+                                        <input type="number" id="msSeed" value="7182" min="1" max="99999999" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                    </div>
+                                    <div>
+                                        <label style="display: block; margin-bottom: 5px; font-weight: bold;">Count:</label>
+                                        <input type="number" id="msCount" value="100" min="10" max="1000" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Linear Congruential Generator -->
+                            <div class="rng-method-config" id="linearCongruentialConfig" style="display: none; margin-bottom: 15px;">
+                                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 15px;">
+                                    <div>
+                                        <label style="display: block; margin-bottom: 5px; font-weight: bold;">Seed (Z₀):</label>
+                                        <input type="number" id="lcgSeed" value="7" min="1" max="1000" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                    </div>
+                                    <div>
+                                        <label style="display: block; margin-bottom: 5px; font-weight: bold;">Multiplier (a):</label>
+                                        <input type="number" id="lcgMultiplier" value="5" min="1" max="1000" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                    </div>
+                                    <div>
+                                        <label style="display: block; margin-bottom: 5px; font-weight: bold;">Increment (c):</label>
+                                        <input type="number" id="lcgIncrement" value="3" min="0" max="1000" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                    </div>
+                                    <div>
+                                        <label style="display: block; margin-bottom: 5px; font-weight: bold;">Modulus (m):</label>
+                                        <input type="number" id="lcgModulus" value="16" min="2" max="10000" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                    </div>
+                                    <div>
+                                        <label style="display: block; margin-bottom: 5px; font-weight: bold;">Count:</label>
+                                        <input type="number" id="lcgCount" value="100" min="10" max="1000" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <button onclick="generateRNGNumbers()" style="padding: 10px 20px; background-color: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">
+                                Generate Numbers with Selected Method
+                            </button>
+                            
+                            <div id="rngPreview" style="margin-top: 15px; padding: 15px; background-color: #f0f8ff; border-radius: 5px; border: 1px solid #ddd; font-family: 'Courier New', monospace; font-size: 0.9rem; max-height: 150px; overflow-y: auto;">
+                                Generated numbers will appear here...
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                rangeInfo.insertAdjacentHTML('afterend', rngMethodHTML);
+            }
+        }
+        
+        function selectRNGMethod(method) {
+            currentRNGMethod = method;
+            
+            // Update UI
+            const middleSquareBtn = document.querySelector('.rng-method-btn:first-child');
+            const lcgBtn = document.querySelector('.rng-method-btn:last-child');
+            const middleSquareDiv = document.getElementById('middleSquareConfig');
+            const lcgDiv = document.getElementById('linearCongruentialConfig');
+            
+            if (method === 'middleSquare') {
+                middleSquareBtn.classList.add('active');
+                lcgBtn.classList.remove('active');
+                middleSquareDiv.style.display = 'block';
+                lcgDiv.style.display = 'none';
+            } else {
+                middleSquareBtn.classList.remove('active');
+                lcgBtn.classList.add('active');
+                middleSquareDiv.style.display = 'none';
+                lcgDiv.style.display = 'block';
+            }
+        }
+        
+        // Middle-Square Method - NO ROUNDING
+        function generateMiddleSquare() {
+            const seed = parseInt(document.getElementById('msSeed').value) || 7182;
+            const count = parseInt(document.getElementById('msCount').value) || 100;
+            
+            if (isNaN(seed) || isNaN(count)) {
+                showNotification('Please enter valid numbers for all parameters', 'error');
+                return [];
+            }
+            
+            let numbers = [];
+            let middleSquareData = [];
+            let current = seed;
+            let digits = seed.toString().length;
+            
+            for (let i = 0; i < count; i++) {
+                // Square the current number
+                let squared = current * current;
+                
+                // Convert to string and pad with zeros
+                let squaredStr = squared.toString();
+                const desiredLength = digits * 2;
+                while (squaredStr.length < desiredLength) {
+                    squaredStr = '0' + squaredStr;
+                }
+                
+                // Calculate position to start taking middle digits
+                const startPos = Math.floor((squaredStr.length - digits) / 2);
+                const middleDigits = squaredStr.substr(startPos, digits);
+                
+                // Convert to number
+                const nextNumber = parseInt(middleDigits);
+                
+                // Calculate U_i (first 2 decimal places)
+                const middleDigitsStr = middleDigits.toString().padStart(2, '0');
+                const firstTwoDigits = middleDigitsStr.length >= 2 ? middleDigitsStr.substring(0, 2) : '00';
+                
+                // Create U_i value (0.00 to 0.99) from first two digits
+                const u_i = parseInt(firstTwoDigits) / 100;
+                
+                // Generate random number between 0 and 1
+                // NO ROUNDING - USE FLOOR
+                const randomNumber = Math.floor(u_i * 100) / 100;
+                
+                // Ensure number is between 0-1
+                numbers.push(Math.max(FIXED_MIN, Math.min(FIXED_MAX, parseFloat(randomNumber.toFixed(4)))));
+                
+                // Store data for display
+                middleSquareData.push({
+                    i: i,
+                    Zi: current,
+                    Ui: u_i,
+                    ZiSquared: squared,
+                    randomNum: numbers[i]
+                });
+                
+                // Use the next number as seed (or use original if 0)
+                current = nextNumber === 0 ? seed + i + 1 : nextNumber;
+            }
+            
+            lastGeneratedNumbers = numbers;
+            
+            // Display preview
+            const preview = document.getElementById('rngPreview');
+            let previewHTML = '<strong>Middle-Square Method Results (showing first 10):</strong><br><br>';
+            previewHTML += '<table style="width:100%; font-size:0.9em; border-collapse: collapse;">';
+            previewHTML += '<tr><th style="border:1px solid #ccc; padding:4px;">i</th><th style="border:1px solid #ccc; padding:4px;">Z_i</th><th style="border:1px solid #ccc; padding:4px;">U_i</th><th style="border:1px solid #ccc; padding:4px;">Random #</th></tr>';
+            
+            // Show first 10 entries
+            const displayCount = Math.min(10, middleSquareData.length);
+            for (let i = 0; i < displayCount; i++) {
+                const data = middleSquareData[i];
+                previewHTML += `<tr>
+                    <td style="border:1px solid #ccc; padding:4px;">${data.i}</td>
+                    <td style="border:1px solid #ccc; padding:4px;">${data.Zi}</td>
+                    <td style="border:1px solid #ccc; padding:4px;">${data.Ui.toFixed(2)}</td>
+                    <td style="border:1px solid #ccc; padding:4px;">${data.randomNum.toFixed(4)}</td>
+                </tr>`;
+            }
+            
+            previewHTML += '</table>';
+            
+            if (middleSquareData.length > 10) {
+                previewHTML += `<p style="margin-top:5px;">... plus ${middleSquareData.length - 10} more entries</p>`;
+            }
+            
+            // Show generated random numbers
+            previewHTML += `<br><strong>Generated Random Numbers (0-1):</strong><br>`;
+            previewHTML += numbers.slice(0, 20).map(n => n.toFixed(4)).join(', ') + 
+                (numbers.length > 20 ? `... (${numbers.length} total)` : '');
+            
+            preview.innerHTML = previewHTML;
+            
+            return numbers;
+        }
+        
+        // Linear Congruential Generator - NO ROUNDING
+        function generateLCG() {
+            const seed = parseInt(document.getElementById('lcgSeed').value) || 7;
+            const multiplier = parseInt(document.getElementById('lcgMultiplier').value) || 5;
+            const increment = parseInt(document.getElementById('lcgIncrement').value) || 3;
+            const modulus = parseInt(document.getElementById('lcgModulus').value) || 16;
+            const count = parseInt(document.getElementById('lcgCount').value) || 100;
+            
+            if (isNaN(seed) || isNaN(multiplier) || isNaN(increment) || isNaN(modulus) || isNaN(count)) {
+                showNotification('Please enter valid numbers for all parameters', 'error');
+                return [];
+            }
+            
+            if (modulus <= 0) {
+                showNotification('Modulus must be greater than 0', 'error');
+                return [];
+            }
+            
+            let numbers = [];
+            let lcgData = [];
+            let current = seed;
+            
+            for (let i = 0; i < count; i++) {
+                // Calculate next number using LCG formula: Z_i = (a * Z_{i-1} + c) mod m
+                current = (multiplier * current + increment) % modulus;
+                
+                // Get U_i value between 0 and 1: U_i = Z_i / m
+                const u_i = current / modulus;
+                
+                // Generate random number between 0 and 1
+                // NO ROUNDING - USE FLOOR
+                const randomNumber = Math.floor(u_i * 10000) / 10000;
+                
+                // Ensure number is between 0-1
+                numbers.push(Math.max(FIXED_MIN, Math.min(FIXED_MAX, parseFloat(randomNumber.toFixed(4)))));
+                
+                // Store data for display
+                lcgData.push({
+                    i: i,
+                    Zi: current,
+                    Ui: u_i,
+                    randomNum: numbers[i]
+                });
+            }
+            
+            lastGeneratedNumbers = numbers;
+            
+            // Display preview
+            const preview = document.getElementById('rngPreview');
+            let previewHTML = '<strong>LCG Results (showing first 10):</strong><br><br>';
+            previewHTML += '<table style="width:100%; font-size:0.9em; border-collapse: collapse;">';
+            previewHTML += '<tr><th style="border:1px solid #ccc; padding:4px;">i</th><th style="border:1px solid #ccc; padding:4px;">Z_i</th><th style="border:1px solid #ccc; padding:4px;">U_i</th><th style="border:1px solid #ccc; padding:4px;">Random #</th></tr>';
+            
+            // Show first 10 entries
+            const displayCount = Math.min(10, lcgData.length);
+            for (let i = 0; i < displayCount; i++) {
+                const data = lcgData[i];
+                previewHTML += `<tr>
+                    <td style="border:1px solid #ccc; padding:4px;">${data.i}</td>
+                    <td style="border:1px solid #ccc; padding:4px;">${data.Zi}</td>
+                    <td style="border:1px solid #ccc; padding:4px;">${data.Ui.toFixed(4)}</td>
+                    <td style="border:1px solid #ccc; padding:4px;">${data.randomNum.toFixed(4)}</td>
+                </tr>`;
+            }
+            
+            previewHTML += '</table>';
+            
+            if (lcgData.length > 10) {
+                previewHTML += `<p style="margin-top:5px;">... plus ${lcgData.length - 10} more entries</p>`;
+            }
+            
+            // Show generated random numbers
+            previewHTML += `<br><br><strong>Generated Random Numbers (0-1):</strong><br>`;
+            previewHTML += numbers.slice(0, 20).map(n => n.toFixed(4)).join(', ') + 
+                (numbers.length > 20 ? `... (${numbers.length} total)` : '');
+            
+            preview.innerHTML = previewHTML;
+            
+            return numbers;
+        }
+        
+        function generateRNGNumbers() {
+            let numbers = [];
+            
+            if (currentRNGMethod === 'middleSquare') {
+                numbers = generateMiddleSquare();
+            } else {
+                numbers = generateLCG();
+            }
+            
+            if (numbers.length === 0) {
+                return;
+            }
+            
+            // Update the main random numbers array
+            randomNumbers = numbers;
+            
+            // Update the custom numbers textarea
+            document.getElementById('customNumbers').value = numbers.map(n => n.toFixed(4)).join(', ');
+            
+            // Update display
+            updateNumberDisplay();
+            clearTestResults();
+            
+            showNotification(`Generated ${numbers.length} numbers using ${currentRNGMethod === 'middleSquare' ? 'Middle-Square' : 'LCG'} method. All numbers are in the fixed range [${FIXED_MIN},${FIXED_MAX}].`, 'success');
+        }
 
-        // Generate random numbers (0-1 only)
+        // Generate random numbers (0-1 only) - Original method
         document.getElementById('generateBtn').addEventListener('click', function() {
             const count = parseInt(document.getElementById('numCount').value) || 100;
             
@@ -659,13 +1160,14 @@
             
             updateNumberDisplay();
             clearTestResults();
+            showNotification(`Generated ${randomNumbers.length} random numbers in the fixed range [${FIXED_MIN},${FIXED_MAX}]`, 'success');
         });
 
         // Use custom numbers (with strict 0-1 validation)
         function useCustomNumbers() {
             const customInput = document.getElementById('customNumbers').value.trim();
             if (!customInput) {
-                alert('Please enter some numbers first.');
+                showNotification('Please enter some numbers first', 'error');
                 return;
             }
             
@@ -689,9 +1191,9 @@
                 updateNumberDisplay();
                 clearTestResults();
                 
-                alert(`Successfully loaded ${numbers.length} numbers in the fixed range [${FIXED_MIN},${FIXED_MAX}].`);
+                showNotification(`Successfully loaded ${numbers.length} numbers in the fixed range [${FIXED_MIN},${FIXED_MAX}]`, 'success');
             } catch (error) {
-                alert(`Error: ${error.message}\n\nPlease enter valid numbers between ${FIXED_MIN} and ${FIXED_MAX} only.`);
+                showNotification(`Error: ${error.message}\n\nPlease enter valid numbers between ${FIXED_MIN} and ${FIXED_MAX} only.`, 'error');
             }
         }
 
@@ -699,7 +1201,7 @@
         function validateCustomNumbers() {
             const customInput = document.getElementById('customNumbers').value.trim();
             if (!customInput) {
-                alert('Please enter some numbers to validate.');
+                showNotification('Please enter some numbers to validate', 'error');
                 return;
             }
             
@@ -771,7 +1273,7 @@
             updateNumberDisplay();
             clearTestResults();
             
-            alert(`Loaded PDF example: 100 random numbers in the fixed range [${FIXED_MIN},${FIXED_MAX}] from Chi-square test.`);
+            showNotification(`Loaded PDF example: 100 random numbers in the fixed range [${FIXED_MIN},${FIXED_MAX}] from Chi-square test.`, 'success');
         }
 
         // Load PDF dependency test example (5 numbers from pages 22-29)
@@ -787,7 +1289,7 @@
             // Switch to dependency tab
             document.querySelector('[data-tab="dependency"]').click();
             
-            alert('Loaded PDF dependency test example (5 numbers from pages 22-29). Switch to Dependency tab to run test.');
+            showNotification('Loaded PDF dependency test example (5 numbers from pages 22-29). Switch to Dependency tab to run test.', 'success');
         }
 
         // Clear random numbers
@@ -796,7 +1298,8 @@
             document.getElementById('customNumbers').value = '';
             updateNumberDisplay();
             clearTestResults();
-            alert('Cleared all random numbers.');
+            hideExportButtons();
+            showNotification('Cleared all random numbers.', 'info');
         }
 
         // Update number display
@@ -838,10 +1341,26 @@
             rangeDisplay.textContent = `${FIXED_MIN.toFixed(4)} - ${FIXED_MAX.toFixed(4)}`;
         }
 
+        // Show export buttons
+        function showExportButtons() {
+            const exportButtons = document.getElementById('exportButtons');
+            exportButtons.style.display = 'flex';
+            exportButtonsVisible = true;
+        }
+
+        // Hide export buttons
+        function hideExportButtons() {
+            const exportButtons = document.getElementById('exportButtons');
+            exportButtons.style.display = 'none';
+            exportButtonsVisible = false;
+        }
+
         // Clear test results
         function clearTestResults() {
             document.getElementById('uniformityResultContent').textContent = 'Test results will appear here...';
             document.getElementById('dependencyResultContent').textContent = 'Test results will appear here...';
+            uniformityResults = null;
+            dependencyResults = null;
         }
 
         // Tab switching
@@ -864,14 +1383,14 @@
         // Uniformity test (for fixed 0-1 range) - CORRECTED VERSION WITH FIXED OBSERVED DATA
         document.getElementById('uniformityTestBtn').addEventListener('click', function() {
             if (randomNumbers.length === 0) {
-                alert('Please generate or enter random numbers first.');
+                showNotification('Please generate or enter random numbers first.', 'error');
                 return;
             }
             
             // Check if any numbers are outside the fixed range
             const outOfRange = randomNumbers.filter(num => num < FIXED_MIN || num > FIXED_MAX);
             if (outOfRange.length > 0) {
-                alert(`Error: ${outOfRange.length} numbers are outside the fixed range [${FIXED_MIN},${FIXED_MAX}].\nPlease remove or correct these numbers before running the test.`);
+                showNotification(`Error: ${outOfRange.length} numbers are outside the fixed range [${FIXED_MIN},${FIXED_MAX}].\nPlease remove or correct these numbers before running the test.`, 'error');
                 return;
             }
             
@@ -880,12 +1399,12 @@
             const N = randomNumbers.length;
             
             if (k > N) {
-                alert(`Number of classes (k=${k}) cannot be greater than number of observations (N=${N}).`);
+                showNotification(`Number of classes (k=${k}) cannot be greater than number of observations (N=${N}).`, 'error');
                 return;
             }
             
             if (k < 2) {
-                alert(`Number of classes must be at least 2.`);
+                showNotification(`Number of classes must be at least 2.`, 'error');
                 return;
             }
             
@@ -982,6 +1501,23 @@
                 }
             }
             
+            // Store results for export
+            uniformityResults = {
+                testType: 'Uniformity (Chi-square)',
+                numbers: randomNumbers,
+                N: N,
+                k: k,
+                df: df,
+                alpha: alpha,
+                expected: expected,
+                chiSquare: chiSquare,
+                criticalValue: criticalValue,
+                rejectH0: chiSquare > criticalValue,
+                intervals: intervals,
+                contributions: contributions,
+                isPDFExample: isPDFExample
+            };
+            
             // Build results
             let resultHTML = `<h3>Chi-square Uniformity Test Results</h3>`;
             resultHTML += `<div class="range-info" style="margin: 10px 0; padding: 10px;">`;
@@ -1062,19 +1598,29 @@
             }
             
             document.getElementById('uniformityResultContent').innerHTML = resultHTML;
+            
+            // Show export buttons
+            showExportButtons();
+            
+            // Run auto-exports if enabled
+            setTimeout(() => {
+                runAutoExports('Uniformity test completed');
+            }, 1000);
+            
+            showNotification(`Uniformity test completed. ${rejectH0 ? 'REJECT H₀' : 'FAIL TO REJECT H₀'} at α=${alpha}.`, rejectH0 ? 'error' : 'success');
         });
 
         // Dependency test (for fixed 0-1 range) - FIXED: k = n-1 (calculated automatically)
         document.getElementById('dependencyTestBtn').addEventListener('click', function() {
             if (randomNumbers.length === 0) {
-                alert('Please generate or enter random numbers first.');
+                showNotification('Please generate or enter random numbers first.', 'error');
                 return;
             }
             
             // Check if any numbers are outside the fixed range
             const outOfRange = randomNumbers.filter(num => num < FIXED_MIN || num > FIXED_MAX);
             if (outOfRange.length > 0) {
-                alert(`Error: ${outOfRange.length} numbers are outside the fixed range [${FIXED_MIN},${FIXED_MAX}].\nPlease remove or correct these numbers before running the test.`);
+                showNotification(`Error: ${outOfRange.length} numbers are outside the fixed range [${FIXED_MIN},${FIXED_MAX}].\nPlease remove or correct these numbers before running the test.`, 'error');
                 return;
             }
             
@@ -1084,7 +1630,7 @@
             const maxLag = n - 1;
             
             if (maxLag < 1) {
-                alert(`Sample size is too small (n=${n}). Need at least 2 numbers for dependency test.`);
+                showNotification(`Sample size is too small (n=${n}). Need at least 2 numbers for dependency test.`, 'error');
                 return;
             }
             
@@ -1125,6 +1671,19 @@
             
             // Calculate average absolute correlation
             const avgAbsRxx = sumAbsCorrelations / maxLag;
+            
+            // Store results for export
+            dependencyResults = {
+                testType: 'Dependency (Autocorrelation)',
+                numbers: randomNumbers,
+                n: n,
+                maxLag: maxLag,
+                xbar: xbar,
+                variance: variance,
+                sx: sx,
+                correlations: correlations,
+                avgAbsRxx: avgAbsRxx
+            };
             
             // Build results
             let resultHTML = `<h3>Autocorrelation Dependency Test Results</h3>`;
@@ -1219,7 +1778,35 @@
             const isPDFExample = randomNumbers.length === 5 && 
                                  JSON.stringify(randomNumbers) === JSON.stringify([0.44, 0.81, 0.14, 0.05, 0.93]);
             
+            if (isPDFExample) {
+                resultHTML += `<div class="info-box" style="margin-top: 20px;">`;
+                resultHTML += `<strong>PDF Example Note:</strong><br>`;
+                resultHTML += `Using the 5 numbers from PDF pages 22-29:<br>`;
+                resultHTML += `• Manual calculation in PDF gives rₓₓ(1) = -0.58 (page 28)<br>`;
+                resultHTML += `• Your calculated: rₓₓ(1) = ${correlations[0].rxx.toFixed(4)}<br>`;
+                resultHTML += `• Negative correlation indicates some dependence<br>`;
+                resultHTML += `• Sample size is very small (n=5), results may not be reliable`;
+                resultHTML += `</div>`;
+            }
+            
             document.getElementById('dependencyResultContent').innerHTML = resultHTML;
+            
+            // Show export buttons
+            showExportButtons();
+            
+            // Run auto-exports if enabled
+            setTimeout(() => {
+                runAutoExports('Dependency test completed');
+            }, 1000);
+            
+            // Show notification based on result
+            if (avgAbsRxx < 0.1) {
+                showNotification(`Dependency test completed. Average autocorrelation (${avgAbsRxx.toFixed(4)}) suggests independence.`, 'success');
+            } else if (avgAbsRxx < 0.3) {
+                showNotification(`Dependency test completed. Average autocorrelation (${avgAbsRxx.toFixed(4)}) suggests weak dependence.`, 'info');
+            } else {
+                showNotification(`Dependency test completed. Average autocorrelation (${avgAbsRxx.toFixed(4)}) suggests significant dependence.`, 'error');
+            }
         });
 
         // Helper function to get chi-square critical values
@@ -1274,6 +1861,396 @@
             tableHTML += `</div>`;
             
             document.getElementById('chiSquareTableContainer').innerHTML = tableHTML;
+        }
+        
+        // Show notification
+        function showNotification(message, type) {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px 20px;
+                border-radius: 5px;
+                color: white;
+                font-weight: 600;
+                z-index: 1000;
+                animation: slideIn 0.3s ease-out;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            `;
+            
+            if (type === 'success') {
+                notification.style.backgroundColor = '#2ecc71';
+            } else if (type === 'error') {
+                notification.style.backgroundColor = '#e74c3c';
+            } else {
+                notification.style.backgroundColor = '#3498db';
+            }
+            
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            // Remove notification after 3 seconds
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease-in';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+        
+        // Run auto-exports after test completion
+        function runAutoExports(testType) {
+            const autoExcel = document.getElementById('autoExcel').checked;
+            const autoPDF = document.getElementById('autoPDF').checked;
+            
+            if (autoExcel) {
+                setTimeout(() => {
+                    exportToExcel();
+                    showNotification(`${testType}. Excel export generated automatically.`, 'success');
+                }, 1500);
+            }
+            
+            if (autoPDF) {
+                setTimeout(() => {
+                    generatePDF();
+                    showNotification(`${testType}. PDF report generated automatically.`, 'success');
+                }, autoExcel ? 3000 : 1500);
+            }
+        }
+        
+        // Generate PDF Report
+        function generatePDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('p', 'mm', 'a4');
+            
+            // PDF metadata
+            doc.setProperties({
+                title: 'Random Number Tests Report',
+                subject: 'Uniformity and Dependency Test Results',
+                author: 'Random Number Test Tool',
+                keywords: 'random numbers, uniformity test, chi-square, dependency test, autocorrelation',
+                creator: 'Random Number Test Tool'
+            });
+            
+            let yPos = 20;
+            const margin = 20;
+            const pageWidth = doc.internal.pageSize.width;
+            const pageHeight = doc.internal.pageSize.height;
+            
+            // Title
+            doc.setFontSize(20);
+            doc.setTextColor(40, 40, 40);
+            doc.text('Random Number Tests Report', pageWidth / 2, yPos, { align: 'center' });
+            yPos += 10;
+            
+            doc.setFontSize(12);
+            doc.setTextColor(100, 100, 100);
+            doc.text(`Generated: ${new Date().toLocaleString()}`, pageWidth / 2, yPos, { align: 'center' });
+            yPos += 15;
+            
+            // Section 1: Basic Information
+            doc.setFontSize(16);
+            doc.setTextColor(50, 50, 50);
+            doc.text('1. Basic Information', margin, yPos);
+            yPos += 10;
+            
+            doc.setFontSize(11);
+            doc.setTextColor(80, 80, 80);
+            doc.text(`Fixed Range: [${FIXED_MIN}, ${FIXED_MAX}]`, margin + 5, yPos);
+            yPos += 7;
+            doc.text(`Number of Values: ${randomNumbers.length}`, margin + 5, yPos);
+            yPos += 7;
+            doc.text(`Generated: ${new Date().toLocaleString()}`, margin + 5, yPos);
+            yPos += 15;
+            
+            // Section 2: Random Numbers Summary
+            doc.setFontSize(16);
+            doc.setTextColor(50, 50, 50);
+            doc.text('2. Random Numbers Summary', margin, yPos);
+            yPos += 10;
+            
+            doc.setFontSize(11);
+            doc.setTextColor(80, 80, 80);
+            
+            // Calculate statistics
+            const minVal = Math.min(...randomNumbers);
+            const maxVal = Math.max(...randomNumbers);
+            const mean = randomNumbers.reduce((a, b) => a + b, 0) / randomNumbers.length;
+            const variance = randomNumbers.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / randomNumbers.length;
+            const stdDev = Math.sqrt(variance);
+            
+            doc.text(`Minimum Value: ${minVal.toFixed(4)}`, margin + 5, yPos);
+            yPos += 7;
+            doc.text(`Maximum Value: ${maxVal.toFixed(4)}`, margin + 5, yPos);
+            yPos += 7;
+            doc.text(`Mean: ${mean.toFixed(4)}`, margin + 5, yPos);
+            yPos += 7;
+            doc.text(`Standard Deviation: ${stdDev.toFixed(4)}`, margin + 5, yPos);
+            yPos += 7;
+            doc.text(`Variance: ${variance.toFixed(4)}`, margin + 5, yPos);
+            yPos += 15;
+            
+            // Sample of numbers (first 20)
+            doc.text('Sample of Numbers (first 20):', margin + 5, yPos);
+            yPos += 7;
+            
+            doc.setFontSize(9);
+            const sampleNumbers = randomNumbers.slice(0, 20).map(n => n.toFixed(4));
+            const sampleText = sampleNumbers.join(', ') + (randomNumbers.length > 20 ? '...' : '');
+            const splitSample = doc.splitTextToSize(sampleText, pageWidth - 2 * margin - 10);
+            doc.text(splitSample, margin + 5, yPos);
+            yPos += splitSample.length * 5 + 10;
+            
+            // Check if we need a new page
+            if (yPos > pageHeight - 50) {
+                doc.addPage();
+                yPos = margin;
+            }
+            
+            // Section 3: Uniformity Test Results
+            if (uniformityResults) {
+                doc.setFontSize(16);
+                doc.setTextColor(50, 50, 50);
+                doc.text('3. Uniformity Test (Chi-square)', margin, yPos);
+                yPos += 10;
+                
+                doc.setFontSize(11);
+                doc.setTextColor(80, 80, 80);
+                
+                doc.text(`Test Type: ${uniformityResults.testType}`, margin + 5, yPos);
+                yPos += 7;
+                doc.text(`Sample Size (N): ${uniformityResults.N}`, margin + 5, yPos);
+                yPos += 7;
+                doc.text(`Number of Classes (k): ${uniformityResults.k}`, margin + 5, yPos);
+                yPos += 7;
+                doc.text(`Degrees of Freedom (df): ${uniformityResults.df}`, margin + 5, yPos);
+                yPos += 7;
+                doc.text(`Significance Level (α): ${uniformityResults.alpha}`, margin + 5, yPos);
+                yPos += 7;
+                doc.text(`Expected Frequency (E): ${uniformityResults.expected.toFixed(2)}`, margin + 5, yPos);
+                yPos += 7;
+                doc.text(`Chi-square Statistic (χ²): ${uniformityResults.chiSquare.toFixed(4)}`, margin + 5, yPos);
+                yPos += 7;
+                doc.text(`Critical Value: ${uniformityResults.criticalValue.toFixed(3)}`, margin + 5, yPos);
+                yPos += 7;
+                doc.text(`Decision: ${uniformityResults.rejectH0 ? 'REJECT H₀' : 'FAIL TO REJECT H₀'}`, margin + 5, yPos);
+                yPos += 7;
+                doc.text(`Conclusion: ${uniformityResults.rejectH0 ? 
+                    'Evidence suggests numbers are NOT uniformly distributed' : 
+                    'No evidence against uniform distribution'}`, margin + 5, yPos);
+                yPos += 15;
+                
+                // Check if we need a new page
+                if (yPos > pageHeight - 100) {
+                    doc.addPage();
+                    yPos = margin;
+                }
+            }
+            
+            // Section 4: Dependency Test Results
+            if (dependencyResults) {
+                doc.setFontSize(16);
+                doc.setTextColor(50, 50, 50);
+                doc.text('4. Dependency Test (Autocorrelation)', margin, yPos);
+                yPos += 10;
+                
+                doc.setFontSize(11);
+                doc.setTextColor(80, 80, 80);
+                
+                doc.text(`Test Type: ${dependencyResults.testType}`, margin + 5, yPos);
+                yPos += 7;
+                doc.text(`Sample Size (n): ${dependencyResults.n}`, margin + 5, yPos);
+                yPos += 7;
+                doc.text(`Maximum Lag (k = n-1): ${dependencyResults.maxLag}`, margin + 5, yPos);
+                yPos += 7;
+                doc.text(`Mean (x̄): ${dependencyResults.xbar.toFixed(4)}`, margin + 5, yPos);
+                yPos += 7;
+                doc.text(`Standard Deviation (sₓ): ${dependencyResults.sx.toFixed(4)}`, margin + 5, yPos);
+                yPos += 7;
+                doc.text(`Variance (sₓ²): ${dependencyResults.variance.toFixed(4)}`, margin + 5, yPos);
+                yPos += 7;
+                doc.text(`Average |rₓₓ(k)|: ${dependencyResults.avgAbsRxx.toFixed(4)}`, margin + 5, yPos);
+                yPos += 7;
+                
+                // Interpretation
+                let interpretation = '';
+                if (dependencyResults.avgAbsRxx < 0.1) {
+                    interpretation = 'Very weak correlation (likely independent)';
+                } else if (dependencyResults.avgAbsRxx < 0.3) {
+                    interpretation = 'Weak correlation (probably acceptable)';
+                } else if (dependencyResults.avgAbsRxx < 0.5) {
+                    interpretation = 'Moderate correlation (questionable)';
+                } else {
+                    interpretation = 'Strong correlation (likely dependent)';
+                }
+                
+                doc.text(`Interpretation: ${interpretation}`, margin + 5, yPos);
+                yPos += 15;
+            }
+            
+            // Footer
+            const pageCount = doc.internal.getNumberOfPages();
+            for (let i = 1; i <= pageCount; i++) {
+                doc.setPage(i);
+                doc.setFontSize(9);
+                doc.setTextColor(150, 150, 150);
+                doc.text(`Page ${i} of ${pageCount}`, pageWidth / 2, pageHeight - 10, { align: 'center' });
+                doc.text(`Random Number Tests Report - Generated ${new Date().toLocaleDateString()}`, pageWidth - margin, pageHeight - 10, { align: 'right' });
+            }
+            
+            // Save the PDF
+            const fileName = `Random_Number_Tests_Report_${new Date().toISOString().slice(0,10)}_${new Date().getTime()}.pdf`;
+            doc.save(fileName);
+            
+            showNotification(`PDF report "${fileName}" has been downloaded`, 'success');
+        }
+        
+        // Export to Excel
+        function exportToExcel() {
+            if (randomNumbers.length === 0) {
+                showNotification('Please generate or enter random numbers first', 'error');
+                return;
+            }
+            
+            // Create workbook
+            const wb = XLSX.utils.book_new();
+            
+            // Add Random Numbers Sheet
+            const numbersData = [
+                ['Random Number Tests - Results'],
+                ['Generated: ' + new Date().toLocaleString()],
+                ['Fixed Range: [' + FIXED_MIN + ', ' + FIXED_MAX + ']'],
+                ['Number of Values: ' + randomNumbers.length],
+                [],
+                ['Random Numbers (0 to 1 only)']
+            ];
+            
+            // Add numbers in chunks of 10 for readability
+            const chunkSize = 10;
+            for (let i = 0; i < randomNumbers.length; i += chunkSize) {
+                const chunk = randomNumbers.slice(i, i + chunkSize);
+                numbersData.push(chunk.map(n => n.toFixed(4)));
+            }
+            
+            // Add statistics
+            numbersData.push([]);
+            numbersData.push(['Statistics:']);
+            
+            const mean = randomNumbers.reduce((a, b) => a + b, 0) / randomNumbers.length;
+            const variance = randomNumbers.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / randomNumbers.length;
+            const stdDev = Math.sqrt(variance);
+            const minVal = Math.min(...randomNumbers);
+            const maxVal = Math.max(...randomNumbers);
+            
+            numbersData.push(['Mean:', mean.toFixed(4)]);
+            numbersData.push(['Standard Deviation:', stdDev.toFixed(4)]);
+            numbersData.push(['Variance:', variance.toFixed(4)]);
+            numbersData.push(['Minimum:', minVal.toFixed(4)]);
+            numbersData.push(['Maximum:', maxVal.toFixed(4)]);
+            
+            const numbersWs = XLSX.utils.aoa_to_sheet(numbersData);
+            XLSX.utils.book_append_sheet(wb, numbersWs, "Random Numbers");
+            
+            // Add Uniformity Test Results if available
+            if (uniformityResults) {
+                const uniformityData = [
+                    ['Uniformity Test (Chi-square) Results'],
+                    ['Sample Size (N):', uniformityResults.N],
+                    ['Number of Classes (k):', uniformityResults.k],
+                    ['Degrees of Freedom (df):', uniformityResults.df],
+                    ['Significance Level (α):', uniformityResults.alpha],
+                    ['Expected Frequency (E):', uniformityResults.expected.toFixed(2)],
+                    ['Chi-square Statistic (χ²):', uniformityResults.chiSquare.toFixed(4)],
+                    ['Critical Value:', uniformityResults.criticalValue.toFixed(3)],
+                    ['Decision:', uniformityResults.rejectH0 ? 'REJECT H₀' : 'FAIL TO REJECT H₀'],
+                    ['Conclusion:', uniformityResults.rejectH0 ? 
+                        'Evidence suggests numbers are NOT uniformly distributed' : 
+                        'No evidence against uniform distribution'],
+                    [],
+                    ['Frequency Distribution Table'],
+                    ['Class', 'Interval', 'Observed (O)', 'Expected (E)', 'O - E', '(O - E)²/E']
+                ];
+                
+                for (let i = 0; i < uniformityResults.intervals.length; i++) {
+                    const interval = uniformityResults.intervals[i];
+                    const contrib = uniformityResults.contributions[i];
+                    
+                    // Format interval
+                    let intervalStr;
+                    if (i === 0) {
+                        intervalStr = `[${interval.min.toFixed(3)}, ${interval.max.toFixed(3)})`;
+                    } else if (i === uniformityResults.intervals.length - 1) {
+                        intervalStr = `[${interval.min.toFixed(3)}, ${interval.max.toFixed(3)}]`;
+                    } else {
+                        intervalStr = `[${interval.min.toFixed(3)}, ${interval.max.toFixed(3)})`;
+                    }
+                    
+                    uniformityData.push([
+                        i + 1,
+                        intervalStr,
+                        interval.observed,
+                        uniformityResults.expected.toFixed(2),
+                        contrib.diff.toFixed(2),
+                        contrib.contribution.toFixed(4)
+                    ]);
+                }
+                
+                uniformityData.push([]);
+                uniformityData.push(['Total χ²:', uniformityResults.chiSquare.toFixed(4)]);
+                
+                const uniformityWs = XLSX.utils.aoa_to_sheet(uniformityData);
+                XLSX.utils.book_append_sheet(wb, uniformityWs, "Uniformity Test");
+            }
+            
+            // Add Dependency Test Results if available
+            if (dependencyResults) {
+                const dependencyData = [
+                    ['Dependency Test (Autocorrelation) Results'],
+                    ['Sample Size (n):', dependencyResults.n],
+                    ['Maximum Lag (k = n-1):', dependencyResults.maxLag],
+                    ['Mean (x̄):', dependencyResults.xbar.toFixed(4)],
+                    ['Std Dev (sₓ):', dependencyResults.sx.toFixed(4)],
+                    ['Variance (sₓ²):', dependencyResults.variance.toFixed(4)],
+                    ['Average |rₓₓ(k)|:', dependencyResults.avgAbsRxx.toFixed(4)],
+                    [],
+                    ['Autocorrelation Coefficients'],
+                    ['Lag (k)', 'n-k', 'Σ(xᵢ-x̄)(xᵢ₊ₖ-x̄)', 'rₓₓ(k)', '|rₓₓ(k)|', 'Interpretation']
+                ];
+                
+                dependencyResults.correlations.forEach(corr => {
+                    let interpretation = '';
+                    if (Math.abs(corr.rxx) < 0.1) {
+                        interpretation = 'Very weak (likely independent)';
+                    } else if (Math.abs(corr.rxx) < 0.3) {
+                        interpretation = 'Weak (probably acceptable)';
+                    } else if (Math.abs(corr.rxx) < 0.5) {
+                        interpretation = 'Moderate (questionable)';
+                    } else {
+                        interpretation = 'Strong (likely dependent)';
+                    }
+                    
+                    dependencyData.push([
+                        corr.lag,
+                        corr.nMinusK,
+                        corr.numerator.toFixed(4),
+                        corr.rxx.toFixed(4),
+                        corr.absRxx.toFixed(4),
+                        interpretation
+                    ]);
+                });
+                
+                const dependencyWs = XLSX.utils.aoa_to_sheet(dependencyData);
+                XLSX.utils.book_append_sheet(wb, dependencyWs, "Dependency Test");
+            }
+            
+            // Generate and download Excel file
+            const fileName = `Random_Number_Tests_${new Date().toISOString().slice(0,10)}_${new Date().getTime()}.xlsx`;
+            XLSX.writeFile(wb, fileName);
+            
+            showNotification(`Excel file "${fileName}" has been downloaded`, 'success');
         }
     </script>
 </body>
