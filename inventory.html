@@ -4,6 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inventory System Simulation</title>
+    <!-- Add jsPDF library for PDF export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- Add html2canvas for PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- Add SheetJS library for Excel export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
     * {
         box-sizing: border-box;
@@ -422,6 +429,277 @@
             color: #27ae60;
             font-weight: bold;
         }
+        
+        /* RNG CONFIGURATION STYLES - ADDED */
+        .rng-section {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border-left: 4px solid #3498db;
+        }
+        
+        .rng-methods {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .rng-method-btn {
+            padding: 10px 20px;
+            background-color: white;
+            color: #3498db;
+            border: 2px solid #3498db;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .rng-method-btn:hover, .rng-method-btn.active {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .rng-params {
+            background-color: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .rng-params-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .rng-params input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .rng-preview {
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #f0f8ff;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        /* EXPORT BUTTONS - ADDED */
+        .export-buttons {
+            display: flex;
+            gap: 15px;
+            margin: 25px 0;
+            flex-wrap: wrap;
+        }
+
+        .export-btn {
+            padding: 12px 25px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 180px;
+        }
+
+        .export-btn.pdf {
+            background-color: #e74c3c;
+        }
+
+        .export-btn.pdf:hover {
+            background-color: #c0392b;
+        }
+
+        .export-btn.excel {
+            background-color: #2ecc71;
+        }
+
+        .export-btn.excel:hover {
+            background-color: #27ae60;
+        }
+
+        .export-btn.print {
+            background-color: #9b59b6;
+        }
+
+        .export-btn.print:hover {
+            background-color: #8e44ad;
+        }
+
+        .export-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        /* AUTO EXPORT SECTION - ADDED */
+        .auto-export-section {
+            background-color: #f0f8ff;
+            border: 2px solid #3498db;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 25px;
+            text-align: center;
+        }
+        
+        .auto-export-options {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .auto-export-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .auto-export-option input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+        }
+        
+        /* PRINT STYLES - ADDED */
+        @media print {
+            .back-btn, .option-buttons, .export-buttons, .add-row-btn, 
+            .remove-row-btn, .simulate-btn, .footer, .input-section,
+            .probability-status, .limit-options, .limit-input,
+            .rng-section, .rng-methods, .rng-preview,
+            .random-numbers-input, textarea, #demandRandoms, 
+            #leadTimeRandoms, .input-group[class*="random"],
+            .random-input-area, .warning, .auto-export-section {
+                display: none !important;
+            }
+            
+            .container {
+                max-width: 100% !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                box-shadow: none !important;
+                background-color: white !important;
+            }
+            
+            body {
+                background: white !important;
+                padding: 0 !important;
+                min-height: auto !important;
+                display: block !important;
+            }
+            
+            .content {
+                padding: 10px !important;
+                box-shadow: none !important;
+                border-radius: 0 !important;
+            }
+            
+            .simulation-table-container {
+                overflow: visible !important;
+                box-shadow: none !important;
+                padding: 0 !important;
+                margin: 10px 0 !important;
+            }
+            
+            .simulation-table {
+                font-size: 0.7rem !important;
+                min-width: auto !important;
+                width: 100% !important;
+            }
+            
+            .distribution-table th, .simulation-table th {
+                color: black !important;
+                background-color: #f0f0f0 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+                font-size: 0.8rem !important;
+                padding: 6px 4px !important;
+            }
+            
+            .distribution-table td, .simulation-table td {
+                padding: 5px 3px !important;
+                font-size: 0.7rem !important;
+            }
+            
+            .summary-card {
+                break-inside: avoid;
+                box-shadow: none !important;
+                border: 1px solid #ddd !important;
+                margin: 5px 0 !important;
+                padding: 10px !important;
+            }
+            
+            .summary-card .value {
+                font-size: 1.4rem !important;
+            }
+            
+            .summary-cards {
+                display: grid !important;
+                grid-template-columns: repeat(3, 1fr) !important;
+                gap: 10px !important;
+                margin: 15px 0 !important;
+            }
+            
+            header {
+                background: white !important;
+                color: black !important;
+                box-shadow: none !important;
+                border: 1px solid #ddd !important;
+                padding: 15px !important;
+                margin-bottom: 15px !important;
+            }
+            
+            h1 {
+                color: black !important;
+                font-size: 1.8rem !important;
+            }
+            
+            h2, h3, h4 {
+                font-size: 1.2rem !important;
+                margin: 10px 0 !important;
+            }
+            
+            .subtitle {
+                color: #666 !important;
+            }
+            
+            .results-header {
+                margin: 15px 0 10px 0 !important;
+                padding-bottom: 5px !important;
+                font-size: 1.1rem !important;
+            }
+            
+            /* Ensure tables don't break across pages */
+            table {
+                page-break-inside: avoid !important;
+            }
+            
+            tr {
+                page-break-inside: avoid !important;
+                page-break-after: auto !important;
+            }
+            
+            /* Hide all input sections in print */
+            div[class*="input"]:not(.input-section):not(.results-section) {
+                display: none !important;
+            }
+        }
     </style>
 </head>
 <body>
@@ -451,6 +729,37 @@
                     <span class="parameter-label">Number of Cycles:</span>
                     <span class="parameter-value" id="displayCycles">5 cycles</span>
                 </div>
+            </div>
+            
+            <!-- Auto Export Options - ADDED -->
+            <div class="auto-export-section">
+                <h3>Automatic Export Options</h3>
+                <div class="auto-export-options">
+                    <div class="auto-export-option">
+                        <input type="checkbox" id="autoExcel" checked>
+                        <label for="autoExcel">Auto-export to Excel after simulation</label>
+                    </div>
+                    <div class="auto-export-option">
+                        <input type="checkbox" id="autoPDF" checked>
+                        <label for="autoPDF">Auto-generate PDF report after simulation</label>
+                    </div>
+                </div>
+                <p style="margin-top: 10px; font-size: 0.9em; color: #666;">
+                    These exports will automatically run after the simulation completes
+                </p>
+            </div>
+            
+            <!-- Export Buttons - ADDED -->
+            <div class="export-buttons" id="exportButtons" style="display: none;">
+                <button class="export-btn print" onclick="window.print()">
+                    <i class="fas fa-print"></i> Print Report
+                </button>
+                <button class="export-btn pdf" onclick="generatePDFReport()">
+                    <i class="fas fa-file-pdf"></i> Generate PDF Report
+                </button>
+                <button class="export-btn excel" onclick="exportToExcel()">
+                    <i class="fas fa-file-excel"></i> Export to Excel
+                </button>
             </div>
             
             <div class="input-section">
@@ -490,6 +799,71 @@
                     <label for="initialLeadTime">Initial Order Lead Time (days until arrival):</label>
                     <input type="number" id="initialLeadTime" min="0" max="10" value="2">
                     <div class="input-hint">Days until initial order arrives</div>
+                </div>
+            </div>
+            
+            <!-- RNG Methods Section - ADDED -->
+            <div class="rng-section">
+                <h3>Random Number Generation Methods</h3>
+                <p>Generate random numbers using different algorithms:</p>
+                
+                <div class="rng-methods">
+                    <button class="rng-method-btn active" onclick="selectRNGMethod('middleSquare')">Middle-Square Method</button>
+                    <button class="rng-method-btn" onclick="selectRNGMethod('linearCongruential')">Linear Congruential Generator (LCG)</button>
+                </div>
+                
+                <!-- Middle-Square Method -->
+                <div class="rng-params" id="middleSquareConfig">
+                    <h4>Middle-Square Method Parameters</h4>
+                    <div class="rng-params-grid">
+                        <div>
+                            <label>Seed (any number):</label>
+                            <input type="number" id="msSeed" value="7182" min="1" max="99999999">
+                        </div>
+                        <div>
+                            <label>Count:</label>
+                            <input type="number" id="msCount" value="30" min="10" max="200">
+                        </div>
+                    </div>
+                    <div style="margin-top: 10px;">
+                        <button class="option-btn" onclick="generateRNGNumbers('demand')">Generate for Demand</button>
+                        <button class="option-btn" onclick="generateRNGNumbers('leadTime')">Generate for Lead Time</button>
+                    </div>
+                </div>
+                
+                <!-- Linear Congruential Generator -->
+                <div class="rng-params" id="linearCongruentialConfig" style="display: none;">
+                    <h4>Linear Congruential Generator Parameters</h4>
+                    <div class="rng-params-grid">
+                        <div>
+                            <label>Seed (Z₀):</label>
+                            <input type="number" id="lcgSeed" value="7" min="1" max="1000">
+                        </div>
+                        <div>
+                            <label>Multiplier (a):</label>
+                            <input type="number" id="lcgMultiplier" value="5" min="1" max="1000">
+                        </div>
+                        <div>
+                            <label>Increment (c):</label>
+                            <input type="number" id="lcgIncrement" value="3" min="0" max="1000">
+                        </div>
+                        <div>
+                            <label>Modulus (m):</label>
+                            <input type="number" id="lcgModulus" value="16" min="2" max="10000">
+                        </div>
+                        <div>
+                            <label>Count:</label>
+                            <input type="number" id="lcgCount" value="30" min="10" max="200">
+                        </div>
+                    </div>
+                    <div style="margin-top: 10px;">
+                        <button class="option-btn" onclick="generateRNGNumbers('demand')">Generate for Demand</button>
+                        <button class="option-btn" onclick="generateRNGNumbers('leadTime')">Generate for Lead Time</button>
+                    </div>
+                </div>
+                
+                <div id="rngPreview" class="rng-preview">
+                    Generated numbers will appear here...
                 </div>
             </div>
             
@@ -567,13 +941,13 @@
                 
                 <div class="option-buttons">
                     <button class="option-btn" onclick="generateDemandRandoms()">
-                        Generate Demand Random Numbers
+                        <i class="fas fa-random"></i> Generate Demand Random Numbers
                     </button>
                     <button class="option-btn" onclick="generateLeadTimeRandoms()">
-                        Generate Lead Time Random Numbers
+                        <i class="fas fa-random"></i> Generate Lead Time Random Numbers
                     </button>
                     <button class="option-btn" onclick="loadExampleFromPDF()">
-                        Load PDF Example
+                        <i class="fas fa-file-pdf"></i> Load PDF Example
                     </button>
                 </div>
                 
@@ -591,7 +965,7 @@
             </div>
             
             <button class="simulate-btn" onclick="runInventorySimulation()">
-                Run Inventory Simulation
+                <i class="fas fa-play-circle"></i> Run Inventory Simulation
             </button>
             
             <div class="results-section" id="resultsSection">
@@ -613,6 +987,9 @@
         let initialInventory = 3;
         let initialOrder = 8;
         let initialLeadTime = 2;
+        let currentRNGMethod = 'middleSquare';
+        let simulationResults = null;
+        let lastGeneratedNumbers = [];
         
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
@@ -654,6 +1031,235 @@
             
             if (leadTimeHint && leadTimeHint.classList.contains('input-hint')) {
                 leadTimeHint.textContent = `Need enough for all orders placed (one per cycle = ${cycles} numbers)`;
+            }
+        }
+        
+        // RNG Method Selection - ADDED
+        function selectRNGMethod(method) {
+            currentRNGMethod = method;
+            
+            // Update UI
+            const middleSquareBtn = document.querySelector('.rng-method-btn:first-child');
+            const lcgBtn = document.querySelector('.rng-method-btn:last-child');
+            const middleSquareDiv = document.getElementById('middleSquareConfig');
+            const lcgDiv = document.getElementById('linearCongruentialConfig');
+            
+            if (method === 'middleSquare') {
+                middleSquareBtn.classList.add('active');
+                lcgBtn.classList.remove('active');
+                middleSquareDiv.style.display = 'block';
+                lcgDiv.style.display = 'none';
+            } else {
+                middleSquareBtn.classList.remove('active');
+                lcgBtn.classList.add('active');
+                middleSquareDiv.style.display = 'none';
+                lcgDiv.style.display = 'block';
+            }
+        }
+        
+        // Middle-Square Method - ADDED
+        function generateMiddleSquare(count) {
+            const seed = parseInt(document.getElementById('msSeed').value) || 7182;
+            
+            if (isNaN(seed)) {
+                showNotification('Please enter a valid seed number', 'error');
+                return [];
+            }
+            
+            let numbers = [];
+            let middleSquareData = [];
+            let current = seed;
+            let digits = seed.toString().length;
+            
+            for (let i = 0; i < count; i++) {
+                // Square the current number
+                let squared = current * current;
+                
+                // Convert to string and pad with zeros
+                let squaredStr = squared.toString();
+                const desiredLength = digits * 2;
+                while (squaredStr.length < desiredLength) {
+                    squaredStr = '0' + squaredStr;
+                }
+                
+                // Calculate position to start taking middle digits
+                const startPos = Math.floor((squaredStr.length - digits) / 2);
+                const middleDigits = squaredStr.substr(startPos, digits);
+                
+                // Convert to number
+                const nextNumber = parseInt(middleDigits);
+                
+                // Calculate U_i (first 2 decimal places)
+                const middleDigitsStr = middleDigits.toString().padStart(2, '0');
+                const firstTwoDigits = middleDigitsStr.length >= 2 ? middleDigitsStr.substring(0, 2) : '00';
+                
+                // Create U_i value (0.00 to 0.99) from first two digits
+                const u_i = parseInt(firstTwoDigits) / 100;
+                
+                // Generate random number between 0 and 99 (for 00-99)
+                const randomNumber = Math.floor(u_i * 100);
+                
+                // Store number
+                numbers.push(randomNumber);
+                
+                // Store data for display
+                middleSquareData.push({
+                    i: i,
+                    Zi: current,
+                    Ui: u_i,
+                    randomNum: randomNumber
+                });
+                
+                // Use the next number as seed (or use original if 0)
+                current = nextNumber === 0 ? seed + i + 1 : nextNumber;
+            }
+            
+            lastGeneratedNumbers = numbers;
+            
+            // Display preview
+            const preview = document.getElementById('rngPreview');
+            let previewHTML = `<strong>Middle-Square Method Results (showing first 10):</strong><br><br>`;
+            previewHTML += `<table style="width:100%; font-size:0.9em; border-collapse: collapse;">`;
+            previewHTML += `<tr><th style="border:1px solid #ccc; padding:4px;">i</th><th style="border:1px solid #ccc; padding:4px;">Z_i</th><th style="border:1px solid #ccc; padding:4px;">U_i</th><th style="border:1px solid #ccc; padding:4px;">Random #</th></tr>`;
+            
+            // Show first 10 entries
+            const displayCount = Math.min(10, middleSquareData.length);
+            for (let i = 0; i < displayCount; i++) {
+                const data = middleSquareData[i];
+                previewHTML += `<tr>
+                    <td style="border:1px solid #ccc; padding:4px;">${data.i}</td>
+                    <td style="border:1px solid #ccc; padding:4px;">${data.Zi}</td>
+                    <td style="border:1px solid #ccc; padding:4px;">${data.Ui.toFixed(2)}</td>
+                    <td style="border:1px solid #ccc; padding:4px;">${String(data.randomNum).padStart(2, '0')}</td>
+                </tr>`;
+            }
+            
+            previewHTML += `</table>`;
+            
+            if (middleSquareData.length > 10) {
+                previewHTML += `<p style="margin-top:5px;">... plus ${middleSquareData.length - 10} more entries</p>`;
+            }
+            
+            // Show generated random numbers
+            previewHTML += `<br><strong>Generated Random Numbers (00-99):</strong><br>`;
+            previewHTML += numbers.slice(0, 20).map(n => String(n).padStart(2, '0')).join(', ') + 
+                (numbers.length > 20 ? `... (${numbers.length} total)` : '');
+            
+            preview.innerHTML = previewHTML;
+            
+            return numbers;
+        }
+        
+        // Linear Congruential Generator - ADDED
+        function generateLCG(count) {
+            const seed = parseInt(document.getElementById('lcgSeed').value) || 7;
+            const multiplier = parseInt(document.getElementById('lcgMultiplier').value) || 5;
+            const increment = parseInt(document.getElementById('lcgIncrement').value) || 3;
+            const modulus = parseInt(document.getElementById('lcgModulus').value) || 16;
+            
+            if (isNaN(seed) || isNaN(multiplier) || isNaN(increment) || isNaN(modulus)) {
+                showNotification('Please enter valid numbers for all parameters', 'error');
+                return [];
+            }
+            
+            if (modulus <= 0) {
+                showNotification('Modulus must be greater than 0', 'error');
+                return [];
+            }
+            
+            let numbers = [];
+            let lcgData = [];
+            let current = seed;
+            
+            for (let i = 0; i < count; i++) {
+                // Calculate next number using LCG formula: Z_i = (a * Z_{i-1} + c) mod m
+                current = (multiplier * current + increment) % modulus;
+                
+                // Get U_i value between 0 and 1: U_i = Z_i / m
+                const u_i = current / modulus;
+                
+                // Generate random number between 0 and 99 (for 00-99)
+                const randomNumber = Math.floor(u_i * 100);
+                
+                // Store number
+                numbers.push(randomNumber);
+                
+                // Store data for display
+                lcgData.push({
+                    i: i,
+                    Zi: current,
+                    Ui: u_i,
+                    randomNum: randomNumber
+                });
+            }
+            
+            lastGeneratedNumbers = numbers;
+            
+            // Display preview
+            const preview = document.getElementById('rngPreview');
+            let previewHTML = `<strong>LCG Results (showing first 10):</strong><br><br>`;
+            previewHTML += `<table style="width:100%; font-size:0.9em; border-collapse: collapse;">`;
+            previewHTML += `<tr><th style="border:1px solid #ccc; padding:4px;">i</th><th style="border:1px solid #ccc; padding:4px;">Z_i</th><th style="border:1px solid #ccc; padding:4px;">U_i</th><th style="border:1px solid #ccc; padding:4px;">Random #</th></tr>`;
+            
+            // Show first 10 entries
+            const displayCount = Math.min(10, lcgData.length);
+            for (let i = 0; i < displayCount; i++) {
+                const data = lcgData[i];
+                previewHTML += `<tr>
+                    <td style="border:1px solid #ccc; padding:4px;">${data.i}</td>
+                    <td style="border:1px solid #ccc; padding:4px;">${data.Zi}</td>
+                    <td style="border:1px solid #ccc; padding:4px;">${data.Ui.toFixed(4)}</td>
+                    <td style="border:1px solid #ccc; padding:4px;">${String(data.randomNum).padStart(2, '0')}</td>
+                </tr>`;
+            }
+            
+            previewHTML += `</table>`;
+            
+            if (lcgData.length > 10) {
+                previewHTML += `<p style="margin-top:5px;">... plus ${lcgData.length - 10} more entries</p>`;
+            }
+            
+            // Show generated random numbers
+            previewHTML += `<br><strong>Generated Random Numbers (00-99):</strong><br>`;
+            previewHTML += numbers.slice(0, 20).map(n => String(n).padStart(2, '0')).join(', ') + 
+                (numbers.length > 20 ? `... (${numbers.length} total)` : '');
+            
+            preview.innerHTML = previewHTML;
+            
+            return numbers;
+        }
+        
+        // Generate RNG Numbers - ADDED
+        function generateRNGNumbers(type) {
+            let count;
+            
+            if (currentRNGMethod === 'middleSquare') {
+                count = parseInt(document.getElementById('msCount').value) || 30;
+            } else {
+                count = parseInt(document.getElementById('lcgCount').value) || 30;
+            }
+            
+            let numbers = [];
+            
+            if (currentRNGMethod === 'middleSquare') {
+                numbers = generateMiddleSquare(count);
+            } else {
+                numbers = generateLCG(count);
+            }
+            
+            if (numbers.length === 0) {
+                return;
+            }
+            
+            // Update the appropriate textarea
+            const numbersString = numbers.map(n => String(n).padStart(2, '0')).join(', ');
+            
+            if (type === 'demand') {
+                document.getElementById('demandRandoms').value = numbersString;
+                showNotification(`Generated ${numbers.length} demand random numbers using ${currentRNGMethod === 'middleSquare' ? 'Middle-Square' : 'LCG'} method.`, 'success');
+            } else if (type === 'leadTime') {
+                document.getElementById('leadTimeRandoms').value = numbersString;
+                showNotification(`Generated ${numbers.length} lead time random numbers using ${currentRNGMethod === 'middleSquare' ? 'Middle-Square' : 'LCG'} method.`, 'success');
             }
         }
         
@@ -831,10 +1437,10 @@
                 randomNumbers.push(Math.floor(Math.random() * 100));
             }
             
-            document.getElementById('demandRandoms').value = randomNumbers.join(', ');
-            alert(`Generated ${totalDays} demand random numbers (00-99) for ${cycles} cycles of ${N} days each (total ${totalDays} days)`);
+            document.getElementById('demandRandoms').value = randomNumbers.map(n => String(n).padStart(2, '0')).join(', ');
+            showNotification(`Generated ${totalDays} demand random numbers (00-99) for ${cycles} cycles of ${N} days each (total ${totalDays} days)`, 'success');
             
-            console.log('Generated demand randoms:', randomNumbers); // Debug log
+            console.log('Generated demand randoms:', randomNumbers);
         }
         
         function generateLeadTimeRandoms() {
@@ -852,10 +1458,10 @@
                 randomNumbers.push(Math.floor(Math.random() * 100));
             }
             
-            document.getElementById('leadTimeRandoms').value = randomNumbers.join(', ');
-            alert(`Generated ${cycles} lead time random numbers (00-99) for ${cycles} cycles`);
+            document.getElementById('leadTimeRandoms').value = randomNumbers.map(n => String(n).padStart(2, '0')).join(', ');
+            showNotification(`Generated ${cycles} lead time random numbers (00-99) for ${cycles} cycles`, 'success');
             
-            console.log('Generated lead time randoms:', randomNumbers); // Debug log
+            console.log('Generated lead time randoms:', randomNumbers);
         }
         
         // Load example from PDF
@@ -894,8 +1500,8 @@
             // Lead time randoms from PDF: 
             const leadTimeRandoms = [5, 0, 3, 4, 8];
             
-            document.getElementById('demandRandoms').value = demandRandoms.join(', ');
-            document.getElementById('leadTimeRandoms').value = leadTimeRandoms.join(', ');
+            document.getElementById('demandRandoms').value = demandRandoms.map(n => String(n).padStart(2, '0')).join(', ');
+            document.getElementById('leadTimeRandoms').value = leadTimeRandoms.map(n => String(n).padStart(2, '0')).join(', ');
             
             // Set parameters from PDF
             document.getElementById('maxInventory').value = 11;
@@ -910,7 +1516,7 @@
             updateLeadTimeDistribution();
             updateParameterDisplay();
             
-            alert('Loaded PDF example successfully! This simulates a (11, 5) inventory system for 5 cycles (25 days).');
+            showNotification('Loaded PDF example successfully! This simulates a (11, 5) inventory system for 5 cycles (25 days).', 'success');
         }
         
         // Utility functions
@@ -952,6 +1558,102 @@
             return distribution[distribution.length - 1].value;
         }
         
+        // Show notification - ADDED
+        function showNotification(message, type) {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px 20px;
+                border-radius: 5px;
+                color: white;
+                font-weight: 600;
+                z-index: 1000;
+                animation: slideIn 0.3s ease-out;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            `;
+            
+            if (type === 'success') {
+                notification.style.backgroundColor = '#2ecc71';
+            } else if (type === 'error') {
+                notification.style.backgroundColor = '#e74c3c';
+            } else {
+                notification.style.backgroundColor = '#3498db';
+            }
+            
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            // Remove notification after 3 seconds
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease-in';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+            
+            // Add CSS for animations
+            if (!document.querySelector('#notification-styles')) {
+                const style = document.createElement('style');
+                style.id = 'notification-styles';
+                style.textContent = `
+                    @keyframes slideIn {
+                        from {
+                            transform: translateX(100%);
+                            opacity: 0;
+                        }
+                        to {
+                            transform: translateX(0);
+                            opacity: 1;
+                        }
+                    }
+                    @keyframes slideOut {
+                        from {
+                            transform: translateX(0);
+                            opacity: 1;
+                        }
+                        to {
+                            transform: translateX(100%);
+                            opacity: 0;
+                        }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        }
+        
+        // Show export buttons - ADDED
+        function showExportButtons() {
+            const exportButtons = document.getElementById('exportButtons');
+            exportButtons.style.display = 'flex';
+        }
+        
+        // Hide export buttons - ADDED
+        function hideExportButtons() {
+            const exportButtons = document.getElementById('exportButtons');
+            exportButtons.style.display = 'none';
+        }
+        
+        // Run auto-exports after simulation - ADDED
+        function runAutoExports(simulationType) {
+            const autoExcel = document.getElementById('autoExcel').checked;
+            const autoPDF = document.getElementById('autoPDF').checked;
+            
+            if (autoExcel) {
+                setTimeout(() => {
+                    exportToExcel();
+                }, 1000);
+            }
+            
+            if (autoPDF) {
+                setTimeout(() => {
+                    generatePDFReport();
+                }, autoExcel ? 2000 : 1000);
+            }
+        }
+        
         // Main simulation function
         function runInventorySimulation() {
             // Get parameters
@@ -959,12 +1661,12 @@
             
             // Validate distributions
             if (demandDistribution.length === 0) {
-                alert('Please define daily demand distribution');
+                showNotification('Please define daily demand distribution', 'error');
                 return;
             }
             
             if (leadTimeDistribution.length === 0) {
-                alert('Please define lead time distribution');
+                showNotification('Please define lead time distribution', 'error');
                 return;
             }
             
@@ -974,12 +1676,12 @@
             const tolerance = 0.001;
             
             if (Math.abs(demandTotal - 1.0) > tolerance) {
-                alert('Demand probabilities must sum to exactly 1.0000');
+                showNotification('Demand probabilities must sum to exactly 1.0000', 'error');
                 return;
             }
             
             if (Math.abs(leadTimeTotal - 1.0) > tolerance) {
-                alert('Lead time probabilities must sum to exactly 1.0000');
+                showNotification('Lead time probabilities must sum to exactly 1.0000', 'error');
                 return;
             }
             
@@ -988,7 +1690,7 @@
             const leadTimeInput = document.getElementById('leadTimeRandoms').value.trim();
             
             if (!demandInput || !leadTimeInput) {
-                alert('Please provide random numbers for both demand and lead time');
+                showNotification('Please provide random numbers for both demand and lead time', 'error');
                 return;
             }
             
@@ -1006,20 +1708,34 @@
             // Check if we have enough random numbers
             const totalDays = N * cycles;
             if (demandRandoms.length < totalDays) {
-                alert(`Need ${totalDays} demand random numbers for ${cycles} cycles of ${N} days, got ${demandRandoms.length}`);
+                showNotification(`Need ${totalDays} demand random numbers for ${cycles} cycles of ${N} days, got ${demandRandoms.length}`, 'error');
                 return;
             }
             
             if (leadTimeRandoms.length < cycles) {
-                alert(`Need at least ${cycles} lead time random numbers for ${cycles} cycles, got ${leadTimeRandoms.length}`);
+                showNotification(`Need at least ${cycles} lead time random numbers for ${cycles} cycles, got ${leadTimeRandoms.length}`, 'error');
                 return;
             }
             
             // Run simulation
             const simulation = simulateInventorySystem(demandRandoms, leadTimeRandoms);
             
+            // Store simulation results for export
+            simulationResults = simulation;
+            
             // Display results
             displayInventoryResults(simulation);
+            
+            // Show export buttons
+            showExportButtons();
+            
+            // Show success notification
+            showNotification(`Simulated ${cycles} cycles (${totalDays} days) successfully!`, 'success');
+            
+            // Run auto-exports if enabled
+            setTimeout(() => {
+                runAutoExports('Simulation completed');
+            }, 500);
         }
         
         function simulateInventorySystem(demandRandoms, leadTimeRandoms) {
@@ -1414,6 +2130,381 @@
                     ` : ''}
                 </div>
             `;
+        }
+        
+        // Generate PDF Report - ADDED
+        function generatePDFReport() {
+            if (!simulationResults) {
+                showNotification('Please run a simulation first', 'error');
+                return;
+            }
+            
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('p', 'mm', 'a4');
+            
+            // PDF metadata
+            doc.setProperties({
+                title: 'Inventory System Simulation Report',
+                subject: '(M, N) Periodic Review Inventory System Results',
+                author: 'Inventory Simulation Tool',
+                keywords: 'inventory simulation, periodic review, M N system, shortage, lead time',
+                creator: 'Inventory Simulation Tool'
+            });
+            
+            let yPos = 20;
+            const margin = 20;
+            const pageWidth = doc.internal.pageSize.width;
+            const pageHeight = doc.internal.pageSize.height;
+            
+            // Title
+            doc.setFontSize(20);
+            doc.setTextColor(40, 40, 40);
+            doc.text('Inventory System Simulation Report', pageWidth / 2, yPos, { align: 'center' });
+            yPos += 10;
+            
+            doc.setFontSize(12);
+            doc.setTextColor(100, 100, 100);
+            doc.text(`(M, N) Periodic Review Inventory System`, pageWidth / 2, yPos, { align: 'center' });
+            yPos += 7;
+            doc.text(`Generated: ${new Date().toLocaleString()}`, pageWidth / 2, yPos, { align: 'center' });
+            yPos += 15;
+            
+            // Section 1: Simulation Parameters
+            doc.setFontSize(16);
+            doc.setTextColor(50, 50, 50);
+            doc.text('1. Simulation Parameters', margin, yPos);
+            yPos += 10;
+            
+            doc.setFontSize(11);
+            doc.setTextColor(80, 80, 80);
+            
+            doc.text(`M (Maximum Inventory Level): ${simulationResults.parameters.M} units`, margin + 5, yPos);
+            yPos += 7;
+            doc.text(`N (Review Period Length): ${simulationResults.parameters.N} days`, margin + 5, yPos);
+            yPos += 7;
+            doc.text(`Cycles Simulated: ${simulationResults.parameters.cycles}`, margin + 5, yPos);
+            yPos += 7;
+            doc.text(`Total Days: ${simulationResults.performance.totalDays}`, margin + 5, yPos);
+            yPos += 7;
+            doc.text(`Initial Inventory: ${simulationResults.parameters.initialInventory} units`, margin + 5, yPos);
+            yPos += 7;
+            doc.text(`Initial Order: ${simulationResults.parameters.initialOrder} units arriving in ${simulationResults.parameters.initialLeadTime} days`, margin + 5, yPos);
+            yPos += 15;
+            
+            // Check if we need a new page
+            if (yPos > pageHeight - 100) {
+                doc.addPage();
+                yPos = margin;
+            }
+            
+            // Section 2: Performance Summary
+            doc.setFontSize(16);
+            doc.setTextColor(50, 50, 50);
+            doc.text('2. Performance Summary', margin, yPos);
+            yPos += 10;
+            
+            doc.setFontSize(11);
+            
+            // Create summary table
+            const summaryData = [
+                ['Metric', 'Value'],
+                ['Average Ending Inventory', `${simulationResults.performance.avgEndingInventory.toFixed(2)} units/day`],
+                ['Shortage Days', `${simulationResults.performance.totalShortageDays} days (${simulationResults.performance.shortagePercentage.toFixed(1)}%)`],
+                ['Average Order Quantity', `${simulationResults.performance.avgOrderQuantity.toFixed(2)} units/cycle`],
+                ['Total Orders Placed', `${simulationResults.performance.totalOrderQuantity} units`],
+                ['Final Backlog', `${simulationResults.performance.finalCumulativeShortage} units`],
+                ['Order Formula', `Q = M - Ending Inventory + Cumulative Shortage`]
+            ];
+            
+            // Draw table
+            doc.autoTable({
+                startY: yPos,
+                head: [summaryData[0]],
+                body: summaryData.slice(1),
+                theme: 'grid',
+                headStyles: { fillColor: [41, 128, 185], textColor: 255, fontStyle: 'bold' },
+                margin: { left: margin, right: margin }
+            });
+            
+            yPos = doc.lastAutoTable.finalY + 15;
+            
+            // Check if we need a new page
+            if (yPos > pageHeight - 100) {
+                doc.addPage();
+                yPos = margin;
+            }
+            
+            // Section 3: Distribution Summary
+            doc.setFontSize(16);
+            doc.setTextColor(50, 50, 50);
+            doc.text('3. Input Distributions', margin, yPos);
+            yPos += 10;
+            
+            doc.setFontSize(11);
+            doc.text('Daily Demand Distribution:', margin + 5, yPos);
+            yPos += 7;
+            
+            // Demand distribution table
+            let demandDistData = [['Demand', 'Probability', 'Range']];
+            demandDistribution.forEach(dist => {
+                demandDistData.push([
+                    `${dist.value} units`,
+                    dist.probability.toFixed(4),
+                    `${String(dist.startRange).padStart(2, '0')}-${String(dist.displayEndRange).padStart(2, '0')}`
+                ]);
+            });
+            
+            doc.autoTable({
+                startY: yPos,
+                head: [demandDistData[0]],
+                body: demandDistData.slice(1),
+                theme: 'grid',
+                headStyles: { fillColor: [46, 204, 113], textColor: 255, fontStyle: 'bold' },
+                margin: { left: margin, right: margin }
+            });
+            
+            yPos = doc.lastAutoTable.finalY + 15;
+            
+            // Check if we need a new page
+            if (yPos > pageHeight - 100) {
+                doc.addPage();
+                yPos = margin;
+            }
+            
+            // Lead time distribution
+            doc.text('Lead Time Distribution:', margin + 5, yPos);
+            yPos += 7;
+            
+            let leadTimeDistData = [['Lead Time', 'Probability', 'Range']];
+            leadTimeDistribution.forEach(dist => {
+                leadTimeDistData.push([
+                    `${dist.value} days`,
+                    dist.probability.toFixed(4),
+                    `${String(dist.startRange).padStart(2, '0')}-${String(dist.displayEndRange).padStart(2, '0')}`
+                ]);
+            });
+            
+            doc.autoTable({
+                startY: yPos,
+                head: [leadTimeDistData[0]],
+                body: leadTimeDistData.slice(1),
+                theme: 'grid',
+                headStyles: { fillColor: [155, 89, 182], textColor: 255, fontStyle: 'bold' },
+                margin: { left: margin, right: margin }
+            });
+            
+            yPos = doc.lastAutoTable.finalY + 15;
+            
+            // Check if we need a new page
+            if (yPos > pageHeight - 50) {
+                doc.addPage();
+                yPos = margin;
+            }
+            
+            // Section 4: Sample Data
+            if (simulationResults.simulationData.length > 0) {
+                doc.setFontSize(16);
+                doc.setTextColor(50, 50, 50);
+                doc.text('4. Sample Simulation Data (First 10 Days)', margin, yPos);
+                yPos += 10;
+                
+                doc.setFontSize(11);
+                
+                // Create sample data table
+                let sampleData = [['Cycle', 'Day', 'Beg Inv', 'Demand', 'End Inv', 'Shortage', 'Order', 'Lead Time']];
+                const sampleCount = Math.min(10, simulationResults.simulationData.length);
+                
+                for (let i = 0; i < sampleCount; i++) {
+                    const day = simulationResults.simulationData[i];
+                    sampleData.push([
+                        day.cycle,
+                        day.day,
+                        day.beginningInventory,
+                        day.demand,
+                        day.endingInventory,
+                        day.shortage,
+                        day.orderQuantity > 0 ? day.orderQuantity : '-',
+                        day.leadTime !== '-' ? `${day.leadTime} days` : '-'
+                    ]);
+                }
+                
+                doc.autoTable({
+                    startY: yPos,
+                    head: [sampleData[0]],
+                    body: sampleData.slice(1),
+                    theme: 'grid',
+                    headStyles: { fillColor: [231, 76, 60], textColor: 255, fontStyle: 'bold' },
+                    margin: { left: margin, right: margin }
+                });
+                
+                yPos = doc.lastAutoTable.finalY + 10;
+                
+                if (simulationResults.simulationData.length > 10) {
+                    doc.text(`... and ${simulationResults.simulationData.length - 10} more days`, margin + 5, yPos);
+                    yPos += 7;
+                }
+            }
+            
+            // Conclusion
+            doc.text('', margin + 5, yPos);
+            yPos += 10;
+            
+            doc.setFontSize(12);
+            doc.setTextColor(50, 50, 50);
+            doc.text('Analysis:', margin + 5, yPos);
+            yPos += 7;
+            
+            doc.setFontSize(11);
+            doc.setTextColor(80, 80, 80);
+            
+            const conclusion = `This simulation of a (${simulationResults.parameters.M}, ${simulationResults.parameters.N}) inventory system shows an average ending inventory of ${simulationResults.performance.avgEndingInventory.toFixed(2)} units per day. 
+            Shortages occurred on ${simulationResults.performance.totalShortageDays} days (${simulationResults.performance.shortagePercentage.toFixed(1)}% of the time). 
+            The average order quantity was ${simulationResults.performance.avgOrderQuantity.toFixed(2)} units per cycle, with ${simulationResults.performance.finalCumulativeShortage} units still in backlog at the end.`;
+            
+            const splitConclusion = doc.splitTextToSize(conclusion, pageWidth - 2 * margin - 10);
+            doc.text(splitConclusion, margin + 5, yPos);
+            yPos += splitConclusion.length * 5 + 10;
+            
+            // Footer
+            const pageCount = doc.internal.getNumberOfPages();
+            for (let i = 1; i <= pageCount; i++) {
+                doc.setPage(i);
+                doc.setFontSize(9);
+                doc.setTextColor(150, 150, 150);
+                doc.text(`Page ${i} of ${pageCount}`, pageWidth / 2, pageHeight - 10, { align: 'center' });
+                doc.text(`Inventory Simulation Report - ${new Date().toLocaleDateString()}`, pageWidth - margin, pageHeight - 10, { align: 'right' });
+            }
+            
+            // Save the PDF
+            const fileName = `Inventory_Simulation_Report_${new Date().toISOString().slice(0,10)}_${new Date().getTime()}.pdf`;
+            doc.save(fileName);
+            
+            showNotification(`PDF report "${fileName}" has been downloaded`, 'success');
+        }
+        
+        // Export to Excel - ADDED
+        function exportToExcel() {
+            if (!simulationResults) {
+                showNotification('Please run a simulation first', 'error');
+                return;
+            }
+            
+            // Create workbook
+            const wb = XLSX.utils.book_new();
+            
+            // Add Summary Sheet
+            const summaryData = [
+                ['Inventory System Simulation Results'],
+                ['(M, N) Periodic Review Inventory System'],
+                ['Generated: ' + new Date().toLocaleString()],
+                [''],
+                ['Performance Summary']
+            ];
+            
+            summaryData.push(['Metric', 'Value', '']);
+            summaryData.push(['M (Maximum Inventory Level)', simulationResults.parameters.M + ' units', '']);
+            summaryData.push(['N (Review Period Length)', simulationResults.parameters.N + ' days', '']);
+            summaryData.push(['Cycles Simulated', simulationResults.parameters.cycles, '']);
+            summaryData.push(['Total Days', simulationResults.performance.totalDays + ' days', '']);
+            summaryData.push(['Average Ending Inventory', simulationResults.performance.avgEndingInventory.toFixed(2) + ' units/day', '']);
+            summaryData.push(['Shortage Days', simulationResults.performance.totalShortageDays + ' days (' + simulationResults.performance.shortagePercentage.toFixed(1) + '%)', '']);
+            summaryData.push(['Average Order Quantity', simulationResults.performance.avgOrderQuantity.toFixed(2) + ' units/cycle', '']);
+            summaryData.push(['Total Orders Placed', simulationResults.performance.totalOrderQuantity + ' units', '']);
+            summaryData.push(['Final Backlog', simulationResults.performance.finalCumulativeShortage + ' units', '']);
+            summaryData.push(['', '', '']);
+            summaryData.push(['Initial Parameters', '', '']);
+            summaryData.push(['Initial Inventory', simulationResults.parameters.initialInventory + ' units', '']);
+            summaryData.push(['Initial Order', simulationResults.parameters.initialOrder + ' units', '']);
+            summaryData.push(['Initial Lead Time', simulationResults.parameters.initialLeadTime + ' days', '']);
+            
+            const summaryWs = XLSX.utils.aoa_to_sheet(summaryData);
+            XLSX.utils.book_append_sheet(wb, summaryWs, "Summary");
+            
+            // Add Distribution Sheets
+            const demandDistData = [
+                ['Daily Demand Distribution'],
+                ['Demand (units)', 'Probability', 'Cumulative', 'Range']
+            ];
+            
+            demandDistribution.forEach(dist => {
+                demandDistData.push([
+                    dist.value,
+                    dist.probability.toFixed(4),
+                    dist.cumulative.toFixed(4),
+                    `${String(dist.startRange).padStart(2, '0')}-${String(dist.displayEndRange).padStart(2, '0')}`
+                ]);
+            });
+            
+            const demandDistWs = XLSX.utils.aoa_to_sheet(demandDistData);
+            XLSX.utils.book_append_sheet(wb, demandDistWs, "Demand Distribution");
+            
+            // Lead Time Distribution
+            const leadTimeDistData = [
+                ['Lead Time Distribution'],
+                ['Lead Time (days)', 'Probability', 'Cumulative', 'Range']
+            ];
+            
+            leadTimeDistribution.forEach(dist => {
+                leadTimeDistData.push([
+                    dist.value,
+                    dist.probability.toFixed(4),
+                    dist.cumulative.toFixed(4),
+                    `${String(dist.startRange).padStart(2, '0')}-${String(dist.displayEndRange).padStart(2, '0')}`
+                ]);
+            });
+            
+            const leadTimeDistWs = XLSX.utils.aoa_to_sheet(leadTimeDistData);
+            XLSX.utils.book_append_sheet(wb, leadTimeDistWs, "Lead Time Distribution");
+            
+            // Add Simulation Data Sheet
+            if (simulationResults.simulationData.length > 0) {
+                const simulationData = [
+                    ['Simulation Data'],
+                    ['Cycle', 'Day', 'Beginning Inventory', 'Random Digits for Demand', 'Demand', 
+                     'Ending Inventory', 'Shortage Quantity', 'Cumulative Shortage', 
+                     'Order Quantity', 'Random Digits for Lead Time', 'Lead Time', 'Days Until Order Arrives']
+                ];
+                
+                simulationResults.simulationData.forEach(day => {
+                    simulationData.push([
+                        day.cycle,
+                        day.day,
+                        day.beginningInventory,
+                        String(day.demandRandom).padStart(2, '0'),
+                        day.demand,
+                        day.endingInventory,
+                        day.shortage,
+                        day.cumulativeShortage,
+                        day.orderQuantity > 0 ? day.orderQuantity : '',
+                        day.leadTimeRandom,
+                        day.leadTime,
+                        day.daysUntilOrderArrives
+                    ]);
+                });
+                
+                const simulationWs = XLSX.utils.aoa_to_sheet(simulationData);
+                XLSX.utils.book_append_sheet(wb, simulationWs, "Simulation Data");
+            }
+            
+            // Add Random Numbers Sheet
+            const randomNumbersData = [
+                ['Random Numbers Used in Simulation'],
+                [''],
+                ['Demand Random Numbers:'],
+                [document.getElementById('demandRandoms').value],
+                [''],
+                ['Lead Time Random Numbers:'],
+                [document.getElementById('leadTimeRandoms').value]
+            ];
+            
+            const randomNumbersWs = XLSX.utils.aoa_to_sheet(randomNumbersData);
+            XLSX.utils.book_append_sheet(wb, randomNumbersWs, "Random Numbers");
+            
+            // Generate and download Excel file
+            const fileName = `Inventory_Simulation_${new Date().toISOString().slice(0,10)}_${new Date().getTime()}.xlsx`;
+            XLSX.writeFile(wb, fileName);
+            
+            showNotification(`Excel file "${fileName}" has been downloaded`, 'success');
         }
         
         // Added debug function to test if buttons are working
